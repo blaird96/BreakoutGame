@@ -1,0 +1,11 @@
+## Ignore documentation artifacts in this repo (except README)
+*.pdf
+*.docx
+*.xlsx
+*.txt
+
+## Ignore unit documentation markdown files
+Unit*.md
+
+## Keep the project README tracked
+!README.md
