@@ -22,4 +22,3 @@ Breakout game in C++ as part of UMGC CMSC 495 Group 3 Capstone project.
 - For running it in the future, can either click on the '**Run**' button in VS Code, or by double clicking on the '**main.exe**' file in folder it is located at. 
 
 Here is a video for a basic walkthrough if you would prefer: https://youtu.be/RHrU3I1nsEI?si=UbCCL5GwQ7aRh6ua&t=64. 
-- If using the video, skip the steps about modifying the '**tasks.json**' file and adding the dlls, as that has been done. 
