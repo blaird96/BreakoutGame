@@ -1,4 +1,6 @@
 #include <SFML/Graphics.hpp>
+#include "physicsManager.h"
+#include "GameManager.h"
 
 int main(){
     sf::RenderWindow window(sf::VideoMode({800, 850}), "Breakout Game");
@@ -10,7 +12,11 @@ int main(){
     ball.setOrigin({ball.getRadius(), ball.getRadius()});
     ball.setPosition({400.f, 766.f});
 
-    sf::Vector2f velocity({0.1f,-0.1f}); //this would be up and right
+    PhysicsManager PhysicsManager;
+    PhysicsManager.setVelocity({0.1f, -0.1f});
+
+    GameManager GameManager;
+    
     float xOffset = 10.f; //border of the game area offset for the x-axis (left & right)
     float yOffset = 10.f; //border of the game area offset for the y-axis (top & bottom)
     float paddleYPos = 790.f; //height/y-position of the paddle
@@ -43,21 +49,22 @@ int main(){
         else if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Right) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D)){ //move right
             paddle.setPosition({(paddle.getPosition().x + 0.1f < (window.getSize().x - (xOffset + (paddle.getSize().x / 2))) ? paddle.getPosition().x + 0.1f : (window.getSize().x - (xOffset + (paddle.getSize().x / 2)))), paddleYPos});
         }
+
+        if(GameManager.haveDied()){ paddle.setFillColor(sf::Color::Red); } //life tracking and general game manager testing
         window.draw(paddle);
         
         //ball
-        ball.setPosition(ball.getPosition() + velocity);
-        if(ball.getPosition().x >= (window.getSize().x - (xOffset + ball.getRadius())) || ball.getPosition().x <= (xOffset + ball.getRadius())){ velocity = {velocity.x*-1.f, velocity.y};} //bounce off left or right wall
-        if(ball.getPosition().y <= (yOffset + ball.getRadius())){ velocity = {velocity.x, velocity.y*-1.f}; } //bounce off top wall/ceiling 
+        ball.setPosition(ball.getPosition() + PhysicsManager.getVelocity());
+        if(ball.getPosition().x >= (window.getSize().x - (xOffset + ball.getRadius())) || ball.getPosition().x <= (xOffset + ball.getRadius())){ PhysicsManager.reflectX(); } //bounce off left or right wall
+        if(ball.getPosition().y <= (yOffset + ball.getRadius())){ PhysicsManager.reflectY(); } //bounce off top wall/ceiling 
         if(ball.getPosition().y >= (paddleYPos-(paddle.getSize().y)) && 
            ((ball.getPosition().x > (paddle.getPosition().x - (paddle.getSize().x/2))) && 
             (ball.getPosition().x < (paddle.getPosition().x + (paddle.getSize().x/2))))){
-            velocity = {velocity.x, velocity.y*-1.f};
-        }
+            PhysicsManager.reflectY(); }
         if(ball.getPosition().y > killY){
-            lives--;
+            GameManager.loseLife();
             ball.setPosition({400.f, 766.f});
-            velocity = {0.1f,-0.1f};
+            PhysicsManager.setVelocity({0.1f,-0.1f});
         }
         window.draw(ball);
 
