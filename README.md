@@ -13,8 +13,13 @@ Breakout game in C++ as part of UMGC CMSC 495 Group 3 Capstone project.
     - Once there, click on the row that corresponds to the 'Path' variable and then the 'Edit...' button
     - One in the subpage, click on the 'New' button and paste/put the root in the text area that shows up in the table.
     - After adding it, click 'OK' then 'OK' again to exit out of all of the windows.
-    - To test to make sure it is downloaded, open the command prompt/terminal and type 'g++ --version' and it should show this as part of the message:
-        - 'g++.exe (MinGW-W64 i686-ucrt-posix-dwarf, built by Brecht Sanders, r2) 14.2.0'
+    - To test to make sure it is downloaded, open the command prompt/terminal and type '**g++ --version**' and it should show this as part of the message:
+        - '**g++.exe (MinGW-W64 i686-ucrt-posix-dwarf, built by Brecht Sanders, r2) 14.2.0**'
 - This is built with Visual Studio Code as the intened IDE, it will have to be installed if it isn't.  
+- Once the file '**main.cpp**' is open in VS Code, click the '**Run**' button in the tool bar. 
+- A dropdown should show up to select a debugger, you should click on '**C++ (GDB/ILDB)**' selection, then the '**C/C++: g++.exe...**' that corresponds to the mingw32 compiler that you just downloaded
+    - It should have the file path to where you moved it out of after extracting it.
+- For running it in the future, can either click on the '**Run**' button in VS Code, or by double clicking on the '**main.exe**' file in folder it is located at. 
 
-Here is a video for a basic walkthrough if you would prefer: https://www.youtube.com/watch?v=RHrU3I1EI. 
+Here is a video for a basic walkthrough if you would prefer: https://youtu.be/RHrU3I1nsEI?si=UbCCL5GwQ7aRh6ua&t=64. 
+- If using the video, skip the steps about modifying the '**tasks.json**' file and adding the dlls, as that has been done. 
