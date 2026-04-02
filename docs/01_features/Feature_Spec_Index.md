@@ -7,8 +7,8 @@
 **Semester:** Spring 2026  
 **Team Members:** Ethan Wasniak, Brendan Laird, Steven Dickinson, Kensie Balton, Francini Clemmons  
 **Primary Communication Platform:** Discord  
-**Version:** 0.1 Draft  
-**Last Updated:** 2026-03-16
+**Version:** 0.2  
+**Last Updated:** 2026-04-01  
 
 ---
 
@@ -27,7 +27,38 @@ This index is intended to support the full project lifecycle, including planning
 
 ---
 
-# 2. How to Use This Index
+# 2. Implementation status summary
+
+Status reflects the **current repository** as of **2026-04-01**: a single-file SFML prototype in `main.cpp` at the repository root, plus `README.md` and `.vscode/tasks.json` for build guidance.
+
+- **FS-01** Game window and main loop — **Partial**
+- **FS-02** Paddle input and movement — **Partial**
+- **FS-03** Ball motion and boundary collision — **Partial**
+- **FS-04** Brick grid and brick state — **Not started**
+- **FS-05** Collision system (paddle and bricks) — **Partial** (paddle only in code)
+- **FS-06** Score, lives, and end states — **Partial**
+- **FS-07** Start menu, restart, game flow — **Not started**
+- **FS-08** HUD, visual feedback, presentation — **Not started**
+- **FS-09** Audio and optional enhancements — **Not started**
+- **FS-10** Build setup, tooling, repository workflow — **Partial**
+- **FS-11** Testing and quality assurance — **Not started** (no automated tests in repo)
+- **FS-12** User guide assets and documentation support — **Partial**
+
+**Traceability (FS → primary artifact):**
+
+- **FS-01, FS-02, FS-03, FS-05 (paddle only), FS-06 (lives decrement only):** [`main.cpp`](../../main.cpp) — window/event loop (lines 4–62), paddle (5–7, 34–43), ball and walls/paddle bounce (9–13, 45–58), lives on miss (15, 54–58).
+- **FS-04, FS-05 (brick collisions):** not implemented; no dedicated source files yet.
+- **FS-07, FS-08:** not implemented in `main.cpp` (no game-state UI or menu layer).
+- **FS-09:** not implemented (graphics link set only; no `sfml-audio`).
+- **FS-10:** [`README.md`](../../README.md), [`.vscode/tasks.json`](../../.vscode/tasks.json).
+- **FS-11:** specification only; no `tests/` or test harness in repository.
+- **FS-12:** partial — setup and controls documented in `README.md`; screenshot and evidence checklist lives in FS-12 doc.
+
+Individual Feature Specification documents contain detailed **Status**, requirements, attributes, and acceptance criteria aligned with this summary.
+
+---
+
+# 3. How to Use This Index
 
 Each item in this index should correspond to an individual Feature Specification document stored in the `/docs/01_features/` directory.
 
@@ -46,12 +77,13 @@ Once approved, each Feature Specification should be broken down into implementat
 
 ---
 
-# 3. Feature Specification List
+# 4. Feature Specification List
 
 ## FS-01: Game Window and Main Loop
-**Document Name:** `FS-01_Game_Window_and_Main_Loop.md`  
+**Document Name:** `FS-01_Game-Window_and_Main_Loop.md`  
 **Category:** Core Architecture  
 **Priority:** High  
+**Implementation status (2026-04-01):** Partial  
 
 ### Summary
 Defines the foundational runtime structure of the game, including creation of the application window, initialization of resources, the primary game loop, frame updates, rendering flow, and game shutdown behavior.
@@ -73,6 +105,7 @@ Without this feature, there is no running game. This is the spine of the whole s
 **Document Name:** `FS-02_Paddle_Input_and_Movement.md`  
 **Category:** Core Gameplay  
 **Priority:** High  
+**Implementation status (2026-04-01):** Partial  
 
 ### Summary
 Defines how the player controls the paddle, including keyboard input handling, movement boundaries, responsiveness, and any related movement constraints.
@@ -93,6 +126,7 @@ The paddle is the player’s primary means of interacting with the game. If it f
 **Document Name:** `FS-03_Ball_Motion_and_Boundary_Collision.md`  
 **Category:** Core Gameplay  
 **Priority:** High  
+**Implementation status (2026-04-01):** Partial  
 
 ### Summary
 Defines ball behavior, including initialization, directional movement, speed handling, and collision with the play area boundaries such as walls and ceiling.
@@ -113,6 +147,7 @@ The ball is the engine of gameplay. No ball logic, no Breakout — just a lonely
 **Document Name:** `FS-04_Brick_Grid_and_Brick_State.md`  
 **Category:** Core Gameplay  
 **Priority:** High  
+**Implementation status (2026-04-01):** Not started  
 
 ### Summary
 Defines how bricks are created, arranged, rendered, stored, and updated when struck by the ball.
@@ -133,6 +168,7 @@ Bricks are the target objects that define progression, scoring, and victory cond
 **Document Name:** `FS-05_Collision_System.md`  
 **Category:** Core Gameplay  
 **Priority:** High  
+**Implementation status (2026-04-01):** Partial (paddle only)  
 
 ### Summary
 Defines collision detection and response logic between the ball and interactive gameplay objects, especially the paddle and bricks.
@@ -153,6 +189,7 @@ Collision is where the game either feels coherent or reveals itself as a cardboa
 **Document Name:** `FS-06_Score_Lives_and_End_States.md`  
 **Category:** Game State Management  
 **Priority:** High  
+**Implementation status (2026-04-01):** Partial  
 
 ### Summary
 Defines the systems that track score, remaining lives, win condition, loss condition, and transitions between active play and end states.
@@ -173,6 +210,7 @@ Without game-state tracking, the game has motion but no consequence.
 **Document Name:** `FS-07_Start_Menu_Restart_and_Game_Flow.md`  
 **Category:** User Experience / Game State  
 **Priority:** Medium to High  
+**Implementation status (2026-04-01):** Not started  
 
 ### Summary
 Defines how a session begins, how the player restarts after winning or losing, and how major gameplay states transition.
@@ -193,6 +231,7 @@ A project that only works once per launch is less a game and more a hostage situ
 **Document Name:** `FS-08_HUD_Visual_Feedback_and_Presentation.md`  
 **Category:** User Interface  
 **Priority:** Medium  
+**Implementation status (2026-04-01):** Not started  
 
 ### Summary
 Defines visual information presented to the player, such as score, lives, status messages, and basic presentation polish.
@@ -213,6 +252,7 @@ Even simple games need readable feedback so the user can understand what is happ
 **Document Name:** `FS-09_Audio_and_Optional_Enhancements.md`  
 **Category:** Stretch / Enhancement  
 **Priority:** Low to Medium  
+**Implementation status (2026-04-01):** Not started  
 
 ### Summary
 Defines optional enhancements such as sound effects, music, multiple levels, pause support, or other secondary improvements if time permits.
@@ -233,6 +273,7 @@ This feature allows the team to isolate stretch goals so they do not contaminate
 **Document Name:** `FS-10_Build_Setup_Tooling_and_Repository_Workflow.md`  
 **Category:** Engineering Support  
 **Priority:** High  
+**Implementation status (2026-04-01):** Partial  
 
 ### Summary
 Defines the development environment, compiler assumptions, dependency setup, folder structure, repository conventions, and team workflow expectations.
@@ -254,6 +295,7 @@ If the code cannot be built consistently across the team, the project turns into
 **Document Name:** `FS-11_Testing_and_Quality_Assurance.md`  
 **Category:** Quality Assurance  
 **Priority:** High  
+**Implementation status (2026-04-01):** Not started (strategy doc only; no test harness in repo)  
 
 ### Summary
 Defines the testing strategy for the project, including testable components, manual and automated testing approaches, validation criteria, and defect handling.
@@ -275,6 +317,7 @@ The course expects explicit testing strategy and evidence, not vague claims that
 **Document Name:** `FS-12_User_Guide_Assets_and_Documentation_Support.md`  
 **Category:** Documentation Support  
 **Priority:** Medium  
+**Implementation status (2026-04-01):** Partial  
 
 ### Summary
 Defines the assets, screenshots, instructions, and explanatory materials that must be captured during development to support the final User Guide and Final Report.
@@ -292,7 +335,7 @@ If this is ignored until the end, the team will wind up faking history from memo
 
 ---
 
-# 4. Priority Tiers
+# 5. Priority Tiers
 
 ## Tier 1: Core Must-Have Features
 These features are required for the game to function and for the course deliverables to remain credible:
@@ -317,7 +360,7 @@ These should only be pursued if Tier 1 and Tier 2 are stable:
 
 ---
 
-# 5. Suggested Development Order
+# 6. Suggested Development Order
 
 The recommended implementation sequence is:
 
@@ -338,34 +381,37 @@ This order reflects the logic of building a stable playable foundation first, th
 
 ---
 
-# 6. Open Decisions That May Affect Feature Specs
+# 7. Resolved and remaining open decisions
 
-The following project decisions are still open and may affect implementation details across multiple Feature Specifications:
+**Resolved (documented in repository as of 2026-04-01):**
 
-- final team role assignments
-- selected C++ graphics/game library or framework
-- target operating system and development environment
-- degree of automation in testing
-- whether stretch features will be attempted
-- any team availability or skill constraints that may alter sequencing
+- **Graphics / windowing library:** SFML 3.0.2 (`sfml-graphics`, `sfml-window`, `sfml-system`); see `README.md` and `main.cpp`.
+- **Primary build target:** Windows, MinGW-w64 **32-bit** toolchain (`g++` 14.2.0 per README), SFML installed under `C:\SFML-3.0.2`, compiler under `C:\mingw32` as described in `README.md` and `.vscode/tasks.json`.
+- **Testing approach for the current increment:** manual playtesting of `main.cpp` build; **automated tests not yet present** — FS-11 defines future scope (unit tests for collision/bricks, optional CI).
 
-These open decisions do not prevent drafting individual Feature Specifications, but they should be resolved as early as possible.
+**Still open (team should record in Decision Log when finalized):**
+
+- final team role assignments and owners per Feature Specification
+- branch workflow and review rules (Task Board is empty as of this update)
+- whether stretch goals (FS-09) will be in scope for the term
+- brick grid dimensions, scoring rules, and tuning constants once FS-04/FS-06 are implemented
+- path-portable build (e.g. CMake) vs. documented absolute paths on `C:\`
 
 ---
 
-# 7. Next Steps
+# 8. Next Steps
 
 The next recommended actions are:
 
-1. confirm the feature list as a team
-2. draft the Tier 1 Feature Specifications first
-3. identify owners for each Feature Specification
-4. create the Task Board based on approved Feature Specs
-5. document decisions about framework/tooling and team roles as they are finalized
+1. Use expanded Feature Specifications (FS-01 … FS-12) for task breakdown and assignment.
+2. Populate `docs/02_management/Task_Board.md` from acceptance criteria in each FS (create the file and folder if the team adopts that layout from the Project Blueprint).
+3. Implement missing Tier 1 items (especially FS-04, FS-06 completion, FS-05 brick collisions) before heavy Tier 2 polish.
+4. Capture evidence per FS-12 as features land (screenshots, short clips, setup notes).
+5. Record toolchain and process decisions team policy document (e.g. `docs/02_management/Decision_Log.md` per Project Blueprint) as they are finalized.
 
 ---
 
-# 8. Approval / Review
+# 9. Approval / Review
 
 | Team Member | Reviewed | Notes |
 |---|---|---|
