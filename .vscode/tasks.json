@@ -8,16 +8,17 @@
                 "-fdiagnostics-color=always",
                 "-g",
                 "-IC:\\SFML-3.0.2\\include",
-                "${file}",
+                "${workspaceFolder}\\main.cpp",
+                "${workspaceFolder}\\Game.cpp",
                 "-LC:\\SFML-3.0.2\\lib",
                 "-lsfml-graphics",
                 "-lsfml-window",
                 "-lsfml-system",
                 "-o",
-                "${fileDirname}\\${fileBasenameNoExtension}.exe"
+                "${workspaceFolder}\\main.exe"
             ],
             "options": {
-                "cwd": "${fileDirname}"
+                "cwd": "${workspaceFolder}"
             },
             "problemMatcher": [
                 "$gcc"

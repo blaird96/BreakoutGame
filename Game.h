@@ -1,0 +1,26 @@
+#pragma once
+
+#include <SFML/Graphics.hpp>
+
+#include "GameManager.h"
+#include "physicsManager.h"
+
+class Game {
+public:
+    Game();
+    void run();
+
+private:
+    void initialize();
+    void handleEvents();
+    void handleInput();
+    void update();
+    void render();
+    void drawBorders();
+
+    sf::RenderWindow window;
+    sf::RectangleShape paddle;
+    sf::CircleShape ball;
+    PhysicsManager physicsManager;
+    GameManager gameManager;
+};
