@@ -23,4 +23,11 @@ constexpr float BallInitialVelocityX = 0.1f;
 constexpr float BallInitialVelocityY = -0.1f;
 
 constexpr float KillY = 805.f;
+
+constexpr int BrickRows = 5;
+constexpr int BrickColumns = 8;
+constexpr float BrickWidth = 88.f;
+constexpr float BrickHeight = 28.f;
+constexpr float BrickSpacing = 8.f;
+constexpr float BrickTopOffset = 80.f;
 }  // namespace GameConstants

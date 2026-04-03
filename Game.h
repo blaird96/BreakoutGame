@@ -1,6 +1,7 @@
 #pragma once
 
 #include <SFML/Graphics.hpp>
+#include <vector>
 
 #include "GameManager.h"
 #include "physicsManager.h"
@@ -11,7 +12,14 @@ public:
     void run();
 
 private:
+    struct Brick {
+        sf::RectangleShape shape;
+        bool isActive = true;
+    };
+
     void initialize();
+    void initializeBricks();
+    void resetBricks();
     void handleEvents();
     void handleInput();
     void update();
@@ -21,6 +29,7 @@ private:
     sf::RenderWindow window;
     sf::RectangleShape paddle;
     sf::CircleShape ball;
+    std::vector<Brick> bricks;
     PhysicsManager physicsManager;
     GameManager gameManager;
 };
