@@ -1,6 +1,8 @@
 #pragma once
 
+#include <cstddef>
 #include <SFML/Graphics.hpp>
+#include <optional>
 #include <vector>
 
 #include "GameManager.h"
@@ -33,6 +35,7 @@ private:
     sf::RectangleShape paddle;
     sf::CircleShape ball;
     std::vector<Brick> bricks;
+    std::optional<std::size_t> collidingBrickIndex;
     PhysicsManager physicsManager;
     GameManager gameManager;
 };

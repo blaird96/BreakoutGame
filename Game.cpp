@@ -97,6 +97,7 @@ void Game::handleInput() {
 }
 
 void Game::update() {
+    collidingBrickIndex.reset();
     ball.setPosition(ball.getPosition() + physicsManager.getVelocity());
 
     if (ball.getPosition().x >=
@@ -114,6 +115,8 @@ void Game::update() {
          (ball.getPosition().x < (paddle.getPosition().x + (paddle.getSize().x / 2.f))))) {
         physicsManager.reflectY();
     }
+
+    handleBrickCollision();
 
     if (ball.getPosition().y > GameConstants::KillY) {
         gameManager.loseLife();
@@ -147,6 +150,16 @@ bool Game::ballIntersectsBrick(const Brick& brick) const {
 }
 
 void Game::handleBrickCollision() {
+    for (std::size_t index = 0; index < bricks.size(); ++index) {
+        const Brick& brick = bricks[index];
+        if (!brick.isActive) {
+            continue;
+        }
+        if (ballIntersectsBrick(brick)) {
+            collidingBrickIndex = index;
+            break;
+        }
+    }
 }
 
 void Game::drawBorders() {
