@@ -24,6 +24,7 @@ private:
     void handleInput();
     void update();
     void render();
+    void renderBricks();
     void drawBorders();
 
     sf::RenderWindow window;

@@ -129,8 +129,17 @@ void Game::update() {
 
 void Game::render() {
     drawBorders();
+    renderBricks();
     window.draw(paddle);
     window.draw(ball);
+}
+
+void Game::renderBricks() {
+    for (const Brick& brick : bricks) {
+        if (brick.isActive) {
+            window.draw(brick.shape);
+        }
+    }
 }
 
 void Game::drawBorders() {
