@@ -174,6 +174,9 @@ void Game::render() {
     if (hasHudFont) {
         window.draw(scoreText);
         window.draw(livesText);
+        if (gameState != GameState::Playing) {
+            window.draw(statusText);
+        }
     }
 }
 
@@ -194,6 +197,16 @@ void Game::updateHudText() {
     livesText.setString("Lives: " + std::to_string(gameManager.getLives()));
     scoreText.setPosition({GameConstants::BorderXOffset + 10.f, GameConstants::WindowHeight - 40.f});
     livesText.setPosition({GameConstants::WindowWidth - 170.f, GameConstants::WindowHeight - 40.f});
+
+    if (gameState == GameState::Won) {
+        statusText.setString("YOU WIN!");
+        statusText.setPosition({220.f, 420.f});
+    } else if (gameState == GameState::GameOver) {
+        statusText.setString("GAME OVER");
+        statusText.setPosition({170.f, 420.f});
+    } else {
+        statusText.setString("");
+    }
 }
 
 bool Game::ballIntersectsBrick(const Brick& brick) const {
