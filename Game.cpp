@@ -85,6 +85,13 @@ void Game::resetBricks() {
 }
 
 void Game::resetGame() {
+    score = 0;
+    gameManager.resetLives();
+    resetBricks();
+    resetBall();
+    paddle.setPosition({GameConstants::PaddleStartX, GameConstants::PaddleYPos});
+    paddle.setFillColor(sf::Color::White);
+    gameState = GameState::Playing;
 }
 
 void Game::handleEvents() {
