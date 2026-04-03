@@ -160,6 +160,10 @@ void Game::handleBrickCollision() {
             break;
         }
     }
+
+    if (collidingBrickIndex.has_value()) {
+        bricks[*collidingBrickIndex].isActive = false;
+    }
 }
 
 void Game::drawBorders() {
