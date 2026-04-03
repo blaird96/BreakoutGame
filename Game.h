@@ -28,6 +28,7 @@ private:
     void initialize();
     void initializeBricks();
     void resetBricks();
+    void resetGame();
     void handleEvents();
     void handleInput();
     void update();

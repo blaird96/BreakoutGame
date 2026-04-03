@@ -84,6 +84,9 @@ void Game::resetBricks() {
     gameState = GameState::Playing;
 }
 
+void Game::resetGame() {
+}
+
 void Game::handleEvents() {
     while (auto event = window.pollEvent()) {
         if (event->is<sf::Event::Closed>()) {
