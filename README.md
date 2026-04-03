@@ -1,24 +1,94 @@
-# BreakoutGame
-Breakout game in C++ as part of UMGC CMSC 495 Group 3 Capstone project.
+# Breakout Game - Phase I
 
-## Setting up SFML:
+Breakout implemented in C++ with SFML for UMGC CMSC 495 Group 3 Capstone.
 
-- First, you will have to download both the MinGW compliler and the SFML library at this link: https://www.sfml-dev.org/download/sfml/3.0.2/.
-- The one that should be downloaded is the '**32-Bit GCC 14.2.0 MinGW (DW2) (UCRT)**' and the corresponding 32-bit compiler.
-- Using 32-bit over 64 because 32 can be used on both 64-bit and 32-but machines, whereas the 64-bit can only be used on 64-bit machines
-- After downloading both zip files, extract both the zip file contants and place the root folders, 'mingw32' and 'SFML-3.0.2' into your C: drive.
-- After moiving it, you need to add the path of the complier to your environment variables, which can be done following the steps below:
-    - Copy the path to the compiler (should be just C:\mingw32)
-    - In the in the start menu, look up 'Edit Environment variables for Your Account'
-    - Once there, click on the row that corresponds to the 'Path' variable and then the 'Edit...' button
-    - One in the subpage, click on the 'New' button and paste/put the root in the text area that shows up in the table.
-    - After adding it, click 'OK' then 'OK' again to exit out of all of the windows.
-    - To test to make sure it is downloaded, open the command prompt/terminal and type '**g++ --version**' and it should show this as part of the message:
-        - '**g++.exe (MinGW-W64 i686-ucrt-posix-dwarf, built by Brecht Sanders, r2) 14.2.0**'
-- This is built with Visual Studio Code as the intened IDE, it will have to be installed if it isn't.  
-- Once the file '**main.cpp**' is open in VS Code, click the '**Run**' button in the tool bar. 
-- A dropdown should show up to select a debugger, you should click on '**C++ (GDB/ILDB)**' selection, then the '**C/C++: g++.exe...**' that corresponds to the mingw32 compiler that you just downloaded
-    - It should have the file path to where you moved it out of after extracting it.
-- For running it in the future, can either click on the '**Run**' button in VS Code, or by double clicking on the '**main.exe**' file in folder it is located at. 
+## Overview
 
-Here is a video for a basic walkthrough if you would prefer: https://youtu.be/RHrU3I1nsEI?si=UbCCL5GwQ7aRh6ua&t=64. 
+Phase I establishes a playable foundation of Breakout with:
+
+- Paddle movement and wall constraints
+- Ball movement and bounce behavior
+- Brick grid generation and rendering
+- Ball-brick collision and brick deactivation
+- Score and lives tracking
+- Win and game-over state handling
+- Minimal HUD (score, lives, terminal-state messaging)
+- Restart flow from terminal states
+
+## Setup Instructions (Windows)
+
+### 1) Install toolchain
+
+Install:
+
+- MinGW GCC 14.2.0 (32-bit DW2 UCRT package)
+- SFML 3.0.2 (matching MinGW package)
+
+Download from: [https://www.sfml-dev.org/download/sfml/3.0.2/](https://www.sfml-dev.org/download/sfml/3.0.2/)
+
+### 2) Place dependencies
+
+Extract and place these folders at the root of `C:\`:
+
+- `C:\mingw32`
+- `C:\SFML-3.0.2`
+
+### 3) Add compiler to PATH
+
+Add `C:\mingw32\bin` to the user PATH environment variable.
+
+Verify:
+
+```powershell
+g++ --version
+```
+
+### 4) Optional HUD font
+
+HUD text uses `assets/fonts/PressStart2P-Regular.ttf` when present.  
+If the file is missing, gameplay still runs and HUD text rendering is safely skipped.
+
+## Build and Run
+
+### VS Code task (recommended)
+
+Use the default C++ build task configured in `.vscode/tasks.json`, then run `main.exe`.
+
+### Manual build command
+
+```powershell
+C:\mingw32\bin\g++.exe -fdiagnostics-color=always -g -IC:\SFML-3.0.2\include .\main.cpp .\Game.cpp -LC:\SFML-3.0.2\lib -lsfml-graphics -lsfml-window -lsfml-system -o .\main.exe
+```
+
+Run:
+
+```powershell
+.\main.exe
+```
+
+## Controls
+
+- `Left Arrow` or `A`: Move paddle left
+- `Right Arrow` or `D`: Move paddle right
+- `R`: Restart game (only when in Win or Game Over state)
+
+## Features Implemented in Phase I
+
+- Core game loop and rendering pipeline
+- Paddle and ball entities
+- Brick grid (5x8) with active/inactive lifecycle
+- Brick collision detection and bounce response
+- Score increment on brick hit
+- Lives clamped to zero (no negative values)
+- Win condition when all bricks are cleared
+- Game over condition when lives are exhausted
+- Terminal-state gameplay pause
+- HUD support for score, lives, and result text
+- Full-state reset for restart flow
+
+## Known Limitations
+
+- Build paths are currently hardcoded for Windows (`C:\mingw32`, `C:\SFML-3.0.2`).
+- HUD requires a local font file to render text.
+- No automated tests yet (Phase I uses manual verification).
+- Gameplay uses frame-dependent movement (no delta-time normalization).
