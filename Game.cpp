@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <array>
 #include <cstdint>
+#include <string>
 
 #include "GameConstants.h"
 
@@ -168,6 +169,12 @@ void Game::render() {
     renderBricks();
     window.draw(paddle);
     window.draw(ball);
+    updateHudText();
+
+    if (hasHudFont) {
+        window.draw(scoreText);
+        window.draw(livesText);
+    }
 }
 
 void Game::renderBricks() {
@@ -179,6 +186,14 @@ void Game::renderBricks() {
 }
 
 void Game::updateHudText() {
+    if (!hasHudFont) {
+        return;
+    }
+
+    scoreText.setString("Score: " + std::to_string(score));
+    livesText.setString("Lives: " + std::to_string(gameManager.getLives()));
+    scoreText.setPosition({GameConstants::BorderXOffset + 10.f, GameConstants::WindowHeight - 40.f});
+    livesText.setPosition({GameConstants::WindowWidth - 170.f, GameConstants::WindowHeight - 40.f});
 }
 
 bool Game::ballIntersectsBrick(const Brick& brick) const {
