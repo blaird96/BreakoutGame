@@ -14,6 +14,12 @@ public:
     void run();
 
 private:
+    enum class GameState {
+        Playing,
+        Won,
+        GameOver
+    };
+
     struct Brick {
         sf::RectangleShape shape;
         bool isActive = true;
@@ -37,8 +43,7 @@ private:
     sf::CircleShape ball;
     std::vector<Brick> bricks;
     int score = 0;
-    bool hasWon = false;
-    bool isGameOver = false;
+    GameState gameState = GameState::Playing;
     std::optional<std::size_t> collidingBrickIndex;
     PhysicsManager physicsManager;
     GameManager gameManager;

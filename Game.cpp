@@ -65,7 +65,7 @@ void Game::resetBricks() {
     for (Brick& brick : bricks) {
         brick.isActive = true;
     }
-    hasWon = false;
+    gameState = GameState::Playing;
 }
 
 void Game::handleEvents() {
@@ -77,6 +77,10 @@ void Game::handleEvents() {
 }
 
 void Game::handleInput() {
+    if (gameState != GameState::Playing) {
+        return;
+    }
+
     const float leftBound = GameConstants::BorderXOffset + (paddle.getSize().x / 2.f);
     const float rightBound =
         static_cast<float>(window.getSize().x) - (GameConstants::BorderXOffset + (paddle.getSize().x / 2.f));
@@ -99,6 +103,10 @@ void Game::handleInput() {
 }
 
 void Game::update() {
+    if (gameState != GameState::Playing) {
+        return;
+    }
+
     collidingBrickIndex.reset();
     ball.setPosition(ball.getPosition() + physicsManager.getVelocity());
 
@@ -119,16 +127,18 @@ void Game::update() {
     }
 
     handleBrickCollision();
-    hasWon = std::none_of(bricks.begin(), bricks.end(), [](const Brick& brick) { return brick.isActive; });
+    if (std::none_of(bricks.begin(), bricks.end(), [](const Brick& brick) { return brick.isActive; })) {
+        gameState = GameState::Won;
+        return;
+    }
 
     if (ball.getPosition().y > GameConstants::KillY) {
         gameManager.loseLife();
         resetBall();
     }
 
-    isGameOver = gameManager.haveDied();
-
     if (gameManager.haveDied()) {
+        gameState = GameState::GameOver;
         paddle.setFillColor(sf::Color::Red);
     }
 }
