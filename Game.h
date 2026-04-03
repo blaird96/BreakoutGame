@@ -34,6 +34,7 @@ private:
     void resetBall();
     void render();
     void renderBricks();
+    void updateHudText();
     bool ballIntersectsBrick(const Brick& brick) const;
     void handleBrickCollision();
     void drawBorders();
@@ -41,6 +42,11 @@ private:
     sf::RenderWindow window;
     sf::RectangleShape paddle;
     sf::CircleShape ball;
+    sf::Font hudFont;
+    sf::Text scoreText;
+    sf::Text livesText;
+    sf::Text statusText;
+    bool hasHudFont = false;
     std::vector<Brick> bricks;
     int score = 0;
     GameState gameState = GameState::Playing;
