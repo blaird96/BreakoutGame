@@ -1,3 +1,5 @@
+#include "GameHelpers.h"
+
 class GameManager{
     private:
         int lives;
@@ -6,9 +8,7 @@ class GameManager{
         int getLives() {return lives;}
         void resetLives() {lives = 3;}
         void loseLife() {
-            if (lives > 0) {
-                lives--;
-            }
+            lives = GameHelpers::decrementLife(lives);
         }
         bool haveDied() {return lives <= 0;}
 };

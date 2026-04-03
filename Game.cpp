@@ -6,6 +6,7 @@
 #include <string>
 
 #include "GameConstants.h"
+#include "GameHelpers.h"
 
 Game::Game()
     : window(sf::VideoMode({GameConstants::WindowWidth, GameConstants::WindowHeight}),
@@ -119,18 +120,14 @@ void Game::handleInput() {
 
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Left) ||
         sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A)) {
-        paddle.setPosition(
-            {(paddle.getPosition().x - GameConstants::PaddleSpeed > leftBound
-                  ? paddle.getPosition().x - GameConstants::PaddleSpeed
-                  : leftBound),
-             GameConstants::PaddleYPos});
+        const float nextX = GameHelpers::clampPaddlePosition(
+            paddle.getPosition().x - GameConstants::PaddleSpeed, leftBound, rightBound);
+        paddle.setPosition({nextX, GameConstants::PaddleYPos});
     } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Right) ||
                sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D)) {
-        paddle.setPosition(
-            {(paddle.getPosition().x + GameConstants::PaddleSpeed < rightBound
-                  ? paddle.getPosition().x + GameConstants::PaddleSpeed
-                  : rightBound),
-             GameConstants::PaddleYPos});
+        const float nextX = GameHelpers::clampPaddlePosition(
+            paddle.getPosition().x + GameConstants::PaddleSpeed, leftBound, rightBound);
+        paddle.setPosition({nextX, GameConstants::PaddleYPos});
     }
 }
 
@@ -159,7 +156,9 @@ void Game::update() {
     }
 
     handleBrickCollision();
-    if (std::none_of(bricks.begin(), bricks.end(), [](const Brick& brick) { return brick.isActive; })) {
+    const int activeBrickCount = static_cast<int>(
+        std::count_if(bricks.begin(), bricks.end(), [](const Brick& brick) { return brick.isActive; }));
+    if (!GameHelpers::hasRemainingBricks(activeBrickCount)) {
         gameState = GameState::Won;
         return;
     }
