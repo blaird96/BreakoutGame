@@ -120,14 +120,17 @@ void Game::update() {
 
     if (ball.getPosition().y > GameConstants::KillY) {
         gameManager.loseLife();
-        ball.setPosition({GameConstants::BallStartX, GameConstants::BallStartY});
-        physicsManager.setVelocity(
-            {GameConstants::BallInitialVelocityX, GameConstants::BallInitialVelocityY});
+        resetBall();
     }
 
     if (gameManager.haveDied()) {
         paddle.setFillColor(sf::Color::Red);
     }
+}
+
+void Game::resetBall() {
+    ball.setPosition({GameConstants::BallStartX, GameConstants::BallStartY});
+    physicsManager.setVelocity({GameConstants::BallInitialVelocityX, GameConstants::BallInitialVelocityY});
 }
 
 void Game::render() {

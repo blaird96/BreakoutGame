@@ -25,6 +25,7 @@ private:
     void handleEvents();
     void handleInput();
     void update();
+    void resetBall();
     void render();
     void renderBricks();
     bool ballIntersectsBrick(const Brick& brick) const;
