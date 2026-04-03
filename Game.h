@@ -38,6 +38,7 @@ private:
     std::vector<Brick> bricks;
     int score = 0;
     bool hasWon = false;
+    bool isGameOver = false;
     std::optional<std::size_t> collidingBrickIndex;
     PhysicsManager physicsManager;
     GameManager gameManager;

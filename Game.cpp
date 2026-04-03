@@ -126,6 +126,8 @@ void Game::update() {
         resetBall();
     }
 
+    isGameOver = gameManager.haveDied();
+
     if (gameManager.haveDied()) {
         paddle.setFillColor(sf::Color::Red);
     }
