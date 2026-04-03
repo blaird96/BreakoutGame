@@ -1,6 +1,7 @@
 #include "Game.h"
 
 #include <array>
+#include <cstdint>
 
 #include "GameConstants.h"
 
@@ -32,6 +33,37 @@ void Game::initialize() {
 
     physicsManager.setVelocity(
         {GameConstants::BallInitialVelocityX, GameConstants::BallInitialVelocityY});
+
+    initializeBricks();
+}
+
+void Game::initializeBricks() {
+    bricks.clear();
+    bricks.reserve(GameConstants::BrickRows * GameConstants::BrickColumns);
+
+    const float totalWidth = (GameConstants::BrickColumns * GameConstants::BrickWidth) +
+                             ((GameConstants::BrickColumns - 1) * GameConstants::BrickSpacing);
+    const float startX = (static_cast<float>(window.getSize().x) - totalWidth) / 2.f;
+
+    for (int row = 0; row < GameConstants::BrickRows; ++row) {
+        for (int col = 0; col < GameConstants::BrickColumns; ++col) {
+            Brick brick;
+            brick.shape.setSize({GameConstants::BrickWidth, GameConstants::BrickHeight});
+            brick.shape.setPosition(
+                {startX + (col * (GameConstants::BrickWidth + GameConstants::BrickSpacing)),
+                 GameConstants::BrickTopOffset +
+                     (row * (GameConstants::BrickHeight + GameConstants::BrickSpacing))});
+            brick.shape.setFillColor(sf::Color(0, static_cast<std::uint8_t>(145 + (row * 20)), 255));
+            brick.isActive = true;
+            bricks.push_back(brick);
+        }
+    }
+}
+
+void Game::resetBricks() {
+    for (Brick& brick : bricks) {
+        brick.isActive = true;
+    }
 }
 
 void Game::handleEvents() {
