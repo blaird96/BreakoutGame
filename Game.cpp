@@ -36,6 +36,21 @@ void Game::initialize() {
         {GameConstants::BallInitialVelocityX, GameConstants::BallInitialVelocityY});
 
     initializeBricks();
+
+    if (hudFont.openFromFile("assets/fonts/PressStart2P-Regular.ttf")) {
+        hasHudFont = true;
+        scoreText.setFont(hudFont);
+        livesText.setFont(hudFont);
+        statusText.setFont(hudFont);
+        scoreText.setCharacterSize(20);
+        livesText.setCharacterSize(20);
+        statusText.setCharacterSize(32);
+        scoreText.setFillColor(sf::Color::White);
+        livesText.setFillColor(sf::Color::White);
+        statusText.setFillColor(sf::Color::White);
+    } else {
+        hasHudFont = false;
+    }
 }
 
 void Game::initializeBricks() {
@@ -161,6 +176,9 @@ void Game::renderBricks() {
             window.draw(brick.shape);
         }
     }
+}
+
+void Game::updateHudText() {
 }
 
 bool Game::ballIntersectsBrick(const Brick& brick) const {
