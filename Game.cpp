@@ -1,5 +1,6 @@
 #include "Game.h"
 
+#include <algorithm>
 #include <array>
 #include <cstdint>
 
@@ -64,6 +65,7 @@ void Game::resetBricks() {
     for (Brick& brick : bricks) {
         brick.isActive = true;
     }
+    hasWon = false;
 }
 
 void Game::handleEvents() {
@@ -117,6 +119,7 @@ void Game::update() {
     }
 
     handleBrickCollision();
+    hasWon = std::none_of(bricks.begin(), bricks.end(), [](const Brick& brick) { return brick.isActive; });
 
     if (ball.getPosition().y > GameConstants::KillY) {
         gameManager.loseLife();

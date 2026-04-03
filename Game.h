@@ -37,6 +37,7 @@ private:
     sf::CircleShape ball;
     std::vector<Brick> bricks;
     int score = 0;
+    bool hasWon = false;
     std::optional<std::size_t> collidingBrickIndex;
     PhysicsManager physicsManager;
     GameManager gameManager;
