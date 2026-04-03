@@ -25,6 +25,8 @@ private:
     void update();
     void render();
     void renderBricks();
+    bool ballIntersectsBrick(const Brick& brick) const;
+    void handleBrickCollision();
     void drawBorders();
 
     sf::RenderWindow window;

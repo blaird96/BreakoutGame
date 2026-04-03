@@ -142,6 +142,13 @@ void Game::renderBricks() {
     }
 }
 
+bool Game::ballIntersectsBrick(const Brick& brick) const {
+    return ball.getGlobalBounds().findIntersection(brick.shape.getGlobalBounds()).has_value();
+}
+
+void Game::handleBrickCollision() {
+}
+
 void Game::drawBorders() {
     std::array leftLine = {
         sf::Vertex{sf::Vector2f(GameConstants::BorderXOffset, GameConstants::BorderYOffset)},
