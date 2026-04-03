@@ -99,6 +99,12 @@ void Game::handleEvents() {
         if (event->is<sf::Event::Closed>()) {
             window.close();
         }
+
+        if (const auto* keyPressed = event->getIf<sf::Event::KeyPressed>()) {
+            if (keyPressed->code == sf::Keyboard::Key::R && gameState != GameState::Playing) {
+                resetGame();
+            }
+        }
     }
 }
 
