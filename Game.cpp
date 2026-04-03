@@ -163,6 +163,8 @@ void Game::handleBrickCollision() {
 
     if (collidingBrickIndex.has_value()) {
         bricks[*collidingBrickIndex].isActive = false;
+        physicsManager.reflectY();
+        ball.setPosition(ball.getPosition() + physicsManager.getVelocity());
     }
 }
 
