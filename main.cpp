@@ -4,6 +4,8 @@
 
 int main(){
     sf::RenderWindow window(sf::VideoMode({800, 850}), "Breakout Game");
+    window.setFramerateLimit(950); //950
+
     sf::RectangleShape paddle({150.f, 20.f});
     paddle.setOrigin({75.f, 10.f});
     paddle.setPosition({400.f, 790.f});
@@ -57,11 +59,13 @@ int main(){
         ball.setPosition(ball.getPosition() + PhysicsManager.getVelocity());
         if(ball.getPosition().x >= (window.getSize().x - (xOffset + ball.getRadius())) || ball.getPosition().x <= (xOffset + ball.getRadius())){ PhysicsManager.reflectX(); } //bounce off left or right wall
         if(ball.getPosition().y <= (yOffset + ball.getRadius())){ PhysicsManager.reflectY(); } //bounce off top wall/ceiling 
-        if(ball.getPosition().y >= (paddleYPos-(paddle.getSize().y)) && 
-           ((ball.getPosition().x > (paddle.getPosition().x - (paddle.getSize().x/2))) && 
-            (ball.getPosition().x < (paddle.getPosition().x + (paddle.getSize().x/2))))){
-            PhysicsManager.reflectY(); }
-        if(ball.getPosition().y > killY){
+        if(ball.getPosition().y >= (paddleYPos-(paddle.getSize().y/2)-(ball.getRadius())) && 
+           ((ball.getPosition().x > (paddle.getPosition().x - (paddle.getSize().x/2) - ball.getRadius()/2)) && 
+            (ball.getPosition().x < (paddle.getPosition().x + (paddle.getSize().x/2) + ball.getRadius()/2))) &&
+           (PhysicsManager.getVelocity().y > 0)){
+            PhysicsManager.reflectY(); 
+        }
+        if(ball.getPosition().y > (paddleYPos-(paddle.getSize().y/2)-(ball.getRadius())+10)){
             GameManager.loseLife();
             ball.setPosition({400.f, 766.f});
             PhysicsManager.setVelocity({0.1f,-0.1f});
