@@ -13,6 +13,17 @@
  * in the velocity will mean that the ball is going up, and a positive mean that it is going down. 
  */
 
+ /**REQUIRED PROJECT CONFIGURATION STEPS:
+  * Before running the program for the first time or if you have errors, check these files:
+  * -'tasks.json'
+  *     -'args' must contain:
+  *         -"-IC:\\SFML-3.0.2\\include"
+  *         -"-LC:\\SFML-3.0.2\\lib"
+  *         -"-lsfml-graphics"
+  *         -"-lsfml-window"
+  *         -"-lsfml-system"
+  */
+
 int main(){
     sf::RenderWindow window(sf::VideoMode({800, 850}), "Breakout Game");
     window.setFramerateLimit(950); //To smooth the speed of the game/ball to be more consistient (not entierly working rn, looking into it)
