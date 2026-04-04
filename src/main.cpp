@@ -1,6 +1,7 @@
 #include <SFML/Graphics.hpp>
+#include <iostream>
 #include "PhysicsManager.h"
-#include "GameManager.h"
+#include "GameManager.cpp"
 
 /**CLARIFICATIONS FOR DEVELOPERS:
  * In SFML, the coordinate system for a window of dimensions {width, height} has the following corner coordinates:
@@ -36,10 +37,22 @@ int main(){
     ball.setOrigin({ball.getRadius(), ball.getRadius()});
     ball.setPosition({400.f, 766.f});
 
+    sf::RectangleShape startButton({200.f, 100.f});
+    startButton.setFillColor(sf::Color::Transparent);
+    startButton.setOutlineThickness(4.0f);
+
     PhysicsManager PhysicsManager;
     PhysicsManager.setVelocity({0.1f, -0.1f});
 
     GameManager GameManager;
+
+    sf::Font ttlFont;
+    if(!ttlFont.openFromFile("../assets/fonts/Grow Year.ttf")){std::cout << "Error loading Title Font" << std::endl;}
+    else {std::cout << "Title Font loaded fine" << std::endl;}
+
+    sf::Font btnFont;
+    if(!btnFont.openFromFile("../assets/fonts/Nicholas.ttf")){std::cout << "Error loading Button Font" << std::endl;}
+    else {std::cout << "Button Font loaded fine" << std::endl;}
     
     const float X_OFFSET = 10.f; //border of the game area offset for the x-axis (left & right)
     const float Y_OFFSET = 10.f; //border of the game area offset for the y-axis (top & bottom)
@@ -51,44 +64,67 @@ int main(){
                 window.close();
             }
         }
+
+        auto mousePos = sf::Vector2f(sf::Mouse::getPosition(window));
+        if (startButton.getGlobalBounds().contains(mousePos)){
+            if(sf::Mouse::isButtonPressed(sf::Mouse::Button::Left)){ GameManager.setGameState(eGame_Play); }
+            else{ startButton.setOutlineColor(sf::Color::Green); }
+        }
+        else{ startButton.setOutlineColor(sf::Color::White); }
+
         window.clear(sf::Color(0,0,0)); //clear frame before rewrite
 
-        //borders
-        std::array leftLine = {sf::Vertex{sf::Vector2f(X_OFFSET, Y_OFFSET)}, sf::Vertex{sf::Vector2f(X_OFFSET, (window.getSize().y - Y_OFFSET))}};
-        window.draw(leftLine.data(), leftLine.size(), sf::PrimitiveType::Lines); //left wall
-        std::array topLine = {sf::Vertex{sf::Vector2f(X_OFFSET, Y_OFFSET)}, sf::Vertex{sf::Vector2f((window.getSize().x - X_OFFSET), Y_OFFSET)}};
-        window.draw(topLine.data(), topLine.size(), sf::PrimitiveType::Lines); //top wall 
-        std::array rightLine = {sf::Vertex{sf::Vector2f((window.getSize().x - X_OFFSET), Y_OFFSET)}, sf::Vertex{sf::Vector2f((window.getSize().x - X_OFFSET), (window.getSize().y - Y_OFFSET))}};
-        window.draw(rightLine.data(), rightLine.size(), sf::PrimitiveType::Lines); //right wall
+        if(GameManager.getGameState() == eGame_Main){
+            sf::Text title(ttlFont, "BREAKOUT GAME", 50);
+            title.setFillColor(sf::Color::White);
+            title.setPosition({100.f, 50.f});
+            window.draw(title);
 
-        //paddle 
-        if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Left) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A)){ //move left
-            paddle.setPosition({(paddle.getPosition().x - 0.1f > (X_OFFSET + (paddle.getSize().x / 2)) ? paddle.getPosition().x - 0.1f : (X_OFFSET + (paddle.getSize().x / 2))), PADDLE_Y_POS});
-        }
-        else if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Right) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D)){ //move right
-            paddle.setPosition({(paddle.getPosition().x + 0.1f < (window.getSize().x - (X_OFFSET + (paddle.getSize().x / 2))) ? paddle.getPosition().x + 0.1f : (window.getSize().x - (X_OFFSET + (paddle.getSize().x / 2)))), PADDLE_Y_POS});
-        }
+            startButton.setPosition({300.f, 300.f});
+            window.draw(startButton);
 
-        if(GameManager.haveDied()){ paddle.setFillColor(sf::Color::Red); } //life tracking and general game manager testing
-        window.draw(paddle);
-        
-        //ball
-        ball.setPosition(ball.getPosition() + PhysicsManager.getVelocity());
-        if(ball.getPosition().x >= (window.getSize().x - (X_OFFSET + ball.getRadius())) || ball.getPosition().x <= (X_OFFSET + ball.getRadius())){ PhysicsManager.reflectX(); } //bounce off left or right wall
-        if(ball.getPosition().y <= (Y_OFFSET + ball.getRadius())){ PhysicsManager.reflectY(); } //bounce off top wall/ceiling 
-        if(ball.getPosition().y >= (PADDLE_Y_POS-(paddle.getSize().y/2)-(ball.getRadius())) && 
-           ((ball.getPosition().x > (paddle.getPosition().x - (paddle.getSize().x/2) - ball.getRadius()/2)) && 
-            (ball.getPosition().x < (paddle.getPosition().x + (paddle.getSize().x/2) + ball.getRadius()/2))) &&
-           (PhysicsManager.getVelocity().y > 0)){
-            PhysicsManager.reflectY(); 
+            sf::Text stBtnTxt(btnFont, "START", 40);
+            stBtnTxt.setFillColor(sf::Color::White);
+            stBtnTxt.setPosition({300.0f, 350.0f});
+            window.draw(stBtnTxt);
         }
-        if(ball.getPosition().y > (PADDLE_Y_POS-(paddle.getSize().y/2)-(ball.getRadius())+10)){
-            GameManager.loseLife();
-            ball.setPosition({400.f, 766.f});
-            PhysicsManager.setVelocity({0.1f,-0.1f});
-        }
-        window.draw(ball);
+        else if(GameManager.getGameState() == eGame_Play){
+            //borders
+            std::array leftLine = {sf::Vertex{sf::Vector2f(X_OFFSET, Y_OFFSET)}, sf::Vertex{sf::Vector2f(X_OFFSET, (window.getSize().y - Y_OFFSET))}};
+            window.draw(leftLine.data(), leftLine.size(), sf::PrimitiveType::Lines); //left wall
+            std::array topLine = {sf::Vertex{sf::Vector2f(X_OFFSET, Y_OFFSET)}, sf::Vertex{sf::Vector2f((window.getSize().x - X_OFFSET), Y_OFFSET)}};
+            window.draw(topLine.data(), topLine.size(), sf::PrimitiveType::Lines); //top wall 
+            std::array rightLine = {sf::Vertex{sf::Vector2f((window.getSize().x - X_OFFSET), Y_OFFSET)}, sf::Vertex{sf::Vector2f((window.getSize().x - X_OFFSET), (window.getSize().y - Y_OFFSET))}};
+            window.draw(rightLine.data(), rightLine.size(), sf::PrimitiveType::Lines); //right wall
 
+            //paddle 
+            if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Left) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A)){ //move left
+                paddle.setPosition({(paddle.getPosition().x - 0.1f > (X_OFFSET + (paddle.getSize().x / 2)) ? paddle.getPosition().x - 0.1f : (X_OFFSET + (paddle.getSize().x / 2))), PADDLE_Y_POS});
+            }
+            else if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Right) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D)){ //move right
+                paddle.setPosition({(paddle.getPosition().x + 0.1f < (window.getSize().x - (X_OFFSET + (paddle.getSize().x / 2))) ? paddle.getPosition().x + 0.1f : (window.getSize().x - (X_OFFSET + (paddle.getSize().x / 2)))), PADDLE_Y_POS});
+            }
+
+            if(GameManager.haveDied()){ paddle.setFillColor(sf::Color::Red); } //life tracking and general game manager testing
+            window.draw(paddle);
+            
+            //ball
+            ball.setPosition(ball.getPosition() + PhysicsManager.getVelocity());
+            if(ball.getPosition().x >= (window.getSize().x - (X_OFFSET + ball.getRadius())) || ball.getPosition().x <= (X_OFFSET + ball.getRadius())){ PhysicsManager.reflectX(); } //bounce off left or right wall
+            if(ball.getPosition().y <= (Y_OFFSET + ball.getRadius())){ PhysicsManager.reflectY(); } //bounce off top wall/ceiling 
+            if(ball.getPosition().y >= (PADDLE_Y_POS-(paddle.getSize().y/2)-(ball.getRadius())) && 
+            ((ball.getPosition().x > (paddle.getPosition().x - (paddle.getSize().x/2) - ball.getRadius()/2)) && 
+                (ball.getPosition().x < (paddle.getPosition().x + (paddle.getSize().x/2) + ball.getRadius()/2))) &&
+            (PhysicsManager.getVelocity().y > 0)){
+                PhysicsManager.reflectY(); 
+            }
+            if(ball.getPosition().y > (PADDLE_Y_POS-(paddle.getSize().y/2)-(ball.getRadius())+10)){
+                GameManager.loseLife();
+                ball.setPosition({400.f, 766.f});
+                PhysicsManager.setVelocity({0.1f,-0.1f});
+            }
+            window.draw(ball);
+        }
         window.display();//display all above shapes
     }
     return 0;

@@ -17,7 +17,7 @@
                 "${fileDirname}\\${fileBasenameNoExtension}.exe"
             ],
             "options": {
-                "cwd": "C:/mingw32/bin"
+                "cwd": "C:/Users/ethan/OneDrive/Desktop/BreakoutGame"
             },
             "problemMatcher": [
                 "$gcc"
