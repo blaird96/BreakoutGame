@@ -48,6 +48,7 @@ private:
     void updateHudText();
     void processKeyPressed(const sf::Event::KeyPressed& key);
     void pollKeyboardShortcuts();
+    void handleMouseClick();
     bool ballIntersectsBrick(const Brick& brick) const;
     void handleBrickCollision(float dt);
     void drawBorders();
@@ -63,6 +64,9 @@ private:
     bool hasHudFont = false;
     std::optional<sf::Text> menuTitleText;
     std::optional<sf::Text> menuLineText;
+    sf::RectangleShape playBtn;
+    sf::RectangleShape settingsBtn;
+    sf::RectangleShape quitBtn;
     ScreenState screenState = ScreenState::MainMenu;
     int mainMenuSelection = 0;
     int settingsSelection = 0;

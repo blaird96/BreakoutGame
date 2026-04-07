@@ -72,6 +72,7 @@ void Game::run() {
         handleInput(dt);
         update(dt);
         render();
+        handleMouseClick();
         window.display();
     }
 }
@@ -163,6 +164,34 @@ void Game::handleEvents() {
         }
     }
 }
+
+void Game::handleMouseClick(){
+    auto mousePos = sf::Vector2f(sf::Mouse::getPosition(window));
+    if(playBtn.getGlobalBounds().contains(mousePos)){
+        if(sf::Mouse::isButtonPressed(sf::Mouse::Button::Left)){
+            screenState = ScreenState::Game;
+            resetGame();
+        }
+        playBtn.setOutlineColor(sf::Color::Yellow);
+    }
+    else{playBtn.setOutlineColor(sf::Color::Transparent);}
+    if(settingsBtn.getGlobalBounds().contains(mousePos)){
+        if(sf::Mouse::isButtonPressed(sf::Mouse::Button::Left)){
+            screenState = ScreenState::Settings;
+            settingsSelection = 0;
+        }
+        settingsBtn.setOutlineColor(sf::Color::White);
+    }
+    else{settingsBtn.setOutlineColor(sf::Color::Transparent);}
+    if(quitBtn.getGlobalBounds().contains(mousePos)){
+        if(sf::Mouse::isButtonPressed(sf::Mouse::Button::Left)){
+            window.close();
+        }
+        quitBtn.setOutlineColor(sf::Color::White);
+    }
+    else{quitBtn.setOutlineColor(sf::Color::Transparent);}
+}
+
 
 void Game::pollKeyboardShortcuts() {
     const bool esc = keyOrScanDown(sf::Keyboard::Key::Escape, sf::Keyboard::Scan::Escape);
@@ -348,7 +377,7 @@ void Game::update(float dt) {
 
     if (gameManager.haveDied()) {
         gameState = GameState::GameOver;
-        paddle.setFillColor(sf::Color::Red);
+        //paddle.setFillColor(sf::Color::Red);
     }
 }
 
@@ -413,6 +442,33 @@ void Game::renderMainMenu() {
         const sf::FloatRect b = menuLineText->getLocalBounds();
         menuLineText->setOrigin({b.position.x + b.size.x / 2.f, b.position.y + b.size.y / 2.f});
         menuLineText->setPosition({cx, 340.f + (i * 50.f)});
+        if(i == 0){
+            playBtn.setSize({b.size.x + 20, b.size.y + 20});
+            playBtn.setOrigin({(b.size.x + 20.f) / 2.f, (b.size.y + 20.f) / 2.f});
+            playBtn.setPosition({cx, 340.f + (i * 50.f)});
+            playBtn.setFillColor(sf::Color::Transparent);
+            playBtn.setOutlineThickness(3.f);
+            //playBtn.setOutlineColor(sf::Color::Transparent);
+            window.draw(playBtn);
+        }
+        else if(i == 1){
+            settingsBtn.setSize({b.size.x + 20, b.size.y + 20});
+            settingsBtn.setOrigin({(b.size.x + 20.f) / 2.f, (b.size.y + 20.f) / 2.f});
+            settingsBtn.setPosition({cx, 340.f + (i * 50.f)});
+            settingsBtn.setFillColor(sf::Color::Transparent);
+            settingsBtn.setOutlineThickness(3.f);
+            //settingsBtn.setOutlineColor(sf::Color::Transparent);
+            window.draw(settingsBtn);
+        }
+        else if(i == 2){
+            quitBtn.setSize({b.size.x + 20, b.size.y + 20});
+            quitBtn.setOrigin({(b.size.x + 20.f) / 2.f, (b.size.y + 20.f) / 2.f});
+            quitBtn.setPosition({cx, 340.f + (i * 50.f)});
+            quitBtn.setFillColor(sf::Color::Transparent);
+            quitBtn.setOutlineThickness(3.f);
+            //quitBtn.setOutlineColor(sf::Color::Transparent);
+            window.draw(quitBtn);
+        }
         window.draw(*menuLineText);
     }
 
