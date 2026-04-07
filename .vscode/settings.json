@@ -1,0 +1,5 @@
+{
+    "terminal.integrated.env.windows": {
+        "PATH": "C:\\winlibs-x86_64-posix-seh-gcc-14.2.0-mingw-w64ucrt-12.0.0-r2\\mingw64\\bin;C:\\SFML-3.0.2\\bin;${env:PATH}"
+    }
+}
