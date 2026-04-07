@@ -9,3 +9,8 @@ Unit*.md
 
 ## Keep the project README tracked
 !README.md
+
+## Ignore local build and CMake output
+build/
+CMakeUserPresets.json
+Testing/

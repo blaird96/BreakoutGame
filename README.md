@@ -13,7 +13,7 @@ This repository contains **two** executables you can build separately:
 | **Phase I (default root tasks)** | `phase1_main.cpp`, `Game.cpp`, `src/GameManager.cpp`, shared headers | `main.exe` at repo root | Full Breakout Phase I (menu, bricks, HUD, etc.). Uses `src/GameManager.h` and `src/PhysicsManager.h` shared with the prototype. |
 | **Earlier prototype** | `src/main.cpp` and related `src/` files | e.g. `src/main.exe` via “build active file” | Separate SFML prototype; see `src/.vscode/` if you use that workflow. |
 
-VS Code configuration for the **Phase I** build lives in the repo root `.vscode/` folder (`tasks.json`, `launch.json`, `c_cpp_properties.json`, `settings.json`). Edit those files if your compiler or SFML paths differ—avoid pasting machine-specific paths into this README.
+VS Code configuration for the **Phase I** build lives in the repo root `.vscode/` folder (`tasks.json`, `launch.json`, `c_cpp_properties.json`, `settings.json`). The shared build and run scripts now prefer environment-variable overrides instead of committing machine-specific toolchain paths.
 
 Phase I establishes a playable foundation of Breakout with:
 
@@ -28,25 +28,39 @@ Phase I establishes a playable foundation of Breakout with:
 
 ## Setup Instructions (Windows)
 
-This repo is configured for a **WinLibs GCC 14.2** toolchain plus **SFML 3.0.2** built for the same MinGW flavor.
+This repo targets **C++20 + SFML 3.0.2** on Windows and now supports multiple compatible GCC layouts through the shared PowerShell toolchain resolver. The current scripts can auto-detect common installs such as **MSYS2 UCRT64** and the team’s original **WinLibs GCC 14.2** layout, or you can point the repo at your local install with environment variables. A CMake-based build is also included for a more portable setup and for running the automated unit tests.
 
 ### 1) Toolchain (compiler)
 
-Use the WinLibs distribution at:
+You need a GCC toolchain compatible with your SFML install. The shared scripts currently look for:
 
-- `C:\winlibs-x86_64-posix-seh-gcc-14.2.0-mingw-w64ucrt-12.0.0-r2\mingw64\bin`
+- `C:\msys64\ucrt64\bin\g++.exe`
+- `C:\winlibs-x86_64-posix-seh-gcc-14.2.0-mingw-w64ucrt-12.0.0-r2\mingw64\bin\g++.exe`
+- `g++.exe` on `PATH`
 
-That folder should contain `g++.exe`, `gdb.exe`, and the runtime DLLs MinGW links against.
+If you use MSYS2, prefer the **UCRT64** environment so the compiler, debugger, runtime DLLs, and SFML libraries stay aligned.
 
-Optional: you can also install **MSYS2** for a separate `g++`, but the **VS Code build task** in this repo targets WinLibs so it matches the SFML prebuilt binaries.
+### 1a) CMake / CTest
+
+For the CMake-based workflow, install `cmake` and `ctest`. On MSYS2 UCRT64, the usual package is:
+
+```bash
+pacman -S mingw-w64-ucrt-x86_64-cmake
+```
 
 ### 2) SFML
 
-Extract the **SFML 3.0.2 GCC 14.2 MinGW 64-bit** package so you have:
+You need an SFML 3.0.2 install with this layout:
 
-- `C:\SFML-3.0.2\include`
-- `C:\SFML-3.0.2\lib`
-- `C:\SFML-3.0.2\bin` (SFML DLLs)
+- `include`
+- `lib`
+- `bin`
+
+The shared resolver currently checks:
+
+- `C:\msys64\ucrt64`
+- `C:\SFML-3.0.2`
+- `BREAKOUT_SFML_ROOT`
 
 Download: [SFML 3.0.2](https://www.sfml-dev.org/download/sfml/3.0.2/)
 
@@ -61,8 +75,7 @@ Missing files are skipped **without** calling SFML on a bad path, so you should 
 
 ### 4) Custom install locations
 
-This repo now prefers **environment-variable overrides** over editing shared project files.
-Set these locally if your install differs:
+This repo now prefers **environment-variable overrides** over editing shared project files. Set these locally if your install differs:
 
 - `BREAKOUT_GPP`: full path to `g++.exe`
 - `BREAKOUT_GDB`: full path to `gdb.exe`
@@ -86,12 +99,23 @@ If those variables are not set, the build and run scripts fall back to common lo
 
 ## Build and Run
 
+### CMake build (portable path)
+
+If you want a more portable build setup than the PowerShell scripts, configure the project with CMake from the repo root:
+
+```powershell
+cmake --preset default-debug
+cmake --build --preset default-debug
+```
+
+If your compiler or SFML install is not in the default locations, set `BREAKOUT_GPP` and `BREAKOUT_SFML_ROOT` before configuring.
+
 ### VS Code (recommended)
 
 1. Open this folder in VS Code.
 2. **Build:** `Terminal` → `Run Build Task` (default build compiles `phase1_main.cpp`, `Game.cpp`, and `src/GameManager.cpp` to `main.exe`).
 3. **Run / debug:** `Run` → `Start Debugging` (or F5), configuration **Breakout: Debug (WinLibs + SFML)**.  
-   This builds first, then launches `main.exe` with WinLibs and SFML on `PATH` so DLLs resolve.
+   This builds first, then launches `main.exe` using the configured runtime path entries so DLLs resolve.
 
 The integrated terminal is also configured (workspace settings) so after a successful build you can run:
 
@@ -109,7 +133,7 @@ From the repo root:
 
 ### Manual build command
 
-SFML is **not** a system header: you must pass `-IC:\SFML-3.0.2\include` (or your install) and link with `-L.../lib` plus `-lsfml-graphics`, `-lsfml-window`, `-lsfml-system`. Running `g++ *.cpp` or `g++` on sources without those flags produces `SFML/Graphics.hpp: No such file or directory`.
+SFML is **not** a system header: you must pass the correct `-I...include` and `-L...lib` flags for your local install, then link `-lsfml-graphics`, `-lsfml-window`, and `-lsfml-system`. Running `g++ *.cpp` or `g++` on sources without those flags produces `SFML/Graphics.hpp: No such file or directory`.
 
 From the repo root, you can use:
 
@@ -117,13 +141,36 @@ From the repo root, you can use:
 .\scripts\build-phase1.ps1
 ```
 
-Or the equivalent one-liner:
+Example MSYS2 UCRT64 one-liner:
 
 ```powershell
-C:\winlibs-x86_64-posix-seh-gcc-14.2.0-mingw-w64ucrt-12.0.0-r2\mingw64\bin\g++.exe -std=c++20 -fdiagnostics-color=always -g -IC:\SFML-3.0.2\include .\phase1_main.cpp .\Game.cpp .\src\GameManager.cpp -LC:\SFML-3.0.2\lib -lsfml-graphics -lsfml-window -lsfml-system -o .\main.exe
+C:\msys64\ucrt64\bin\g++.exe -std=c++20 -fdiagnostics-color=always -g -IC:\msys64\ucrt64\include .\phase1_main.cpp .\Game.cpp .\src\GameManager.cpp -LC:\msys64\ucrt64\lib -lsfml-graphics -lsfml-window -lsfml-system -o .\main.exe
 ```
 
-If you run `main.exe` by double-clicking, ensure **WinLibs** `mingw64\bin` and **SFML** `bin` are on your `PATH`, or use the script / VS Code launch configuration above.
+If you run `main.exe` by double-clicking, ensure the correct GCC runtime folder and SFML `bin` folder are on your `PATH`, or use the script / VS Code launch configuration above.
+
+## Automated Tests
+
+The repository now includes a small CTest-based unit test target under `tests/` for deterministic helper and state logic:
+
+- `tests/GameHelpersTests.cpp`
+- `tests/GameManagerTests.cpp`
+- `tests/PhysicsManagerTests.cpp`
+
+Configure and build the tests from the repo root:
+
+```powershell
+cmake --preset tests-debug
+cmake --build --preset tests-debug
+ctest --preset tests-debug
+```
+
+These tests cover:
+
+- clamp and life-decrement helper behavior
+- remaining-brick helper logic
+- game manager life reset, decrement, and game-state setters
+- physics manager velocity storage and axis reflection behavior
 
 ## Controls
 
@@ -172,7 +219,8 @@ Some editors still capture `Esc` while debugging; use **`M`** for menu, or run `
 
 ## Known Limitations
 
-- Build and runtime paths are configured for this machine layout (`C:\winlibs-...`, `C:\SFML-3.0.2`).
+- The shared toolchain setup is more portable than before, but it is still Windows-focused and depends on a locally installed compatible GCC + SFML toolchain.
 - On-screen HUD text needs a loadable font; if none load, fallback menu mode applies (see above).
-- No automated tests yet (Phase I uses manual verification).
+- Automated tests currently focus on deterministic helper and state logic; gameplay integration is still primarily verified through manual testing.
 - Movement uses per-frame delta time so speed stays consistent if the frame rate changes.
+- Brick collision response is intentionally simple and currently uses a basic bounce rule rather than a more advanced directional solver.
