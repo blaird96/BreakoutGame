@@ -1,3 +1,5 @@
+#pragma once
+
 #include "../GameHelpers.h"
 
 enum eGame_State {
