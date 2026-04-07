@@ -61,12 +61,28 @@ Missing files are skipped **without** calling SFML on a bad path, so you should 
 
 ### 4) Custom install locations
 
-If your paths differ, update:
+This repo now prefers **environment-variable overrides** over editing shared project files.
+Set these locally if your install differs:
 
-- `.vscode/tasks.json` (compiler and `-I` / `-L` flags)
-- `.vscode/c_cpp_properties.json` (IntelliSense include path and `compilerPath`)
-- `.vscode/launch.json` and `.vscode/settings.json` (PATH entries for runtime)
-- `scripts/run-game.ps1` (PATH entries)
+- `BREAKOUT_GPP`: full path to `g++.exe`
+- `BREAKOUT_GDB`: full path to `gdb.exe`
+- `BREAKOUT_SFML_ROOT`: folder containing `include`, `lib`, and `bin`
+- `BREAKOUT_RUNTIME_BIN`: optional semicolon-separated runtime DLL path(s)
+
+Examples:
+
+- MSYS2 UCRT64:
+  - `BREAKOUT_GPP=C:\msys64\ucrt64\bin\g++.exe`
+  - `BREAKOUT_GDB=C:\msys64\ucrt64\bin\gdb.exe`
+  - `BREAKOUT_SFML_ROOT=C:\msys64\ucrt64`
+  - `BREAKOUT_RUNTIME_BIN=C:\msys64\ucrt64\bin`
+- Standalone SFML + WinLibs:
+  - `BREAKOUT_GPP=C:\winlibs-...\mingw64\bin\g++.exe`
+  - `BREAKOUT_GDB=C:\winlibs-...\mingw64\bin\gdb.exe`
+  - `BREAKOUT_SFML_ROOT=C:\SFML-3.0.2`
+  - `BREAKOUT_RUNTIME_BIN=C:\winlibs-...\mingw64\bin;C:\SFML-3.0.2\bin`
+
+If those variables are not set, the build and run scripts fall back to common locations such as `C:\msys64\ucrt64` and the original WinLibs path.
 
 ## Build and Run
 
