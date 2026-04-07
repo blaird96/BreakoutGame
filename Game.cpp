@@ -172,24 +172,24 @@ void Game::handleMouseClick(){
             screenState = ScreenState::Game;
             resetGame();
         }
-        playBtn.setOutlineColor(sf::Color::Yellow);
+        mainMenuSelection = 0;
     }
-    else{playBtn.setOutlineColor(sf::Color::Transparent);}
+    //else{playBtn.setOutlineColor(sf::Color::Transparent);}
     if(settingsBtn.getGlobalBounds().contains(mousePos)){
         if(sf::Mouse::isButtonPressed(sf::Mouse::Button::Left)){
             screenState = ScreenState::Settings;
             settingsSelection = 0;
         }
-        settingsBtn.setOutlineColor(sf::Color::White);
+        mainMenuSelection = 1;
     }
-    else{settingsBtn.setOutlineColor(sf::Color::Transparent);}
+    //else{settingsBtn.setOutlineColor(sf::Color::Transparent);}
     if(quitBtn.getGlobalBounds().contains(mousePos)){
         if(sf::Mouse::isButtonPressed(sf::Mouse::Button::Left)){
             window.close();
         }
-        quitBtn.setOutlineColor(sf::Color::White);
+        mainMenuSelection = 2;
     }
-    else{quitBtn.setOutlineColor(sf::Color::Transparent);}
+    //else{quitBtn.setOutlineColor(sf::Color::Transparent);}
 }
 
 
@@ -448,7 +448,7 @@ void Game::renderMainMenu() {
             playBtn.setPosition({cx, 340.f + (i * 50.f)});
             playBtn.setFillColor(sf::Color::Transparent);
             playBtn.setOutlineThickness(3.f);
-            //playBtn.setOutlineColor(sf::Color::Transparent);
+            playBtn.setOutlineColor(i == mainMenuSelection ? sf::Color::Yellow : sf::Color::Transparent);
             window.draw(playBtn);
         }
         else if(i == 1){
@@ -457,7 +457,7 @@ void Game::renderMainMenu() {
             settingsBtn.setPosition({cx, 340.f + (i * 50.f)});
             settingsBtn.setFillColor(sf::Color::Transparent);
             settingsBtn.setOutlineThickness(3.f);
-            //settingsBtn.setOutlineColor(sf::Color::Transparent);
+            settingsBtn.setOutlineColor(i == mainMenuSelection ? sf::Color::Yellow : sf::Color::Transparent);
             window.draw(settingsBtn);
         }
         else if(i == 2){
@@ -466,7 +466,7 @@ void Game::renderMainMenu() {
             quitBtn.setPosition({cx, 340.f + (i * 50.f)});
             quitBtn.setFillColor(sf::Color::Transparent);
             quitBtn.setOutlineThickness(3.f);
-            //quitBtn.setOutlineColor(sf::Color::Transparent);
+            quitBtn.setOutlineColor(i == mainMenuSelection ? sf::Color::Yellow : sf::Color::Transparent);
             window.draw(quitBtn);
         }
         window.draw(*menuLineText);
