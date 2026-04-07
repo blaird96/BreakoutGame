@@ -93,6 +93,16 @@ From the repo root:
 
 ### Manual build command
 
+SFML is **not** a system header: you must pass `-IC:\SFML-3.0.2\include` (or your install) and link with `-L.../lib` plus `-lsfml-graphics`, `-lsfml-window`, `-lsfml-system`. Running `g++ *.cpp` or `g++` on sources without those flags produces `SFML/Graphics.hpp: No such file or directory`.
+
+From the repo root, you can use:
+
+```powershell
+.\scripts\build-phase1.ps1
+```
+
+Or the equivalent one-liner:
+
 ```powershell
 C:\winlibs-x86_64-posix-seh-gcc-14.2.0-mingw-w64ucrt-12.0.0-r2\mingw64\bin\g++.exe -std=c++20 -fdiagnostics-color=always -g -IC:\SFML-3.0.2\include .\phase1_main.cpp .\Game.cpp .\src\GameManager.cpp -LC:\SFML-3.0.2\lib -lsfml-graphics -lsfml-window -lsfml-system -o .\main.exe
 ```
@@ -142,10 +152,11 @@ Some editors still capture `Esc` while debugging; use **`M`** for menu, or run `
 - HUD support for score, lives, and result text
 - Full-state reset for restart flow
 - Main menu and settings screen for paddle and ball speed multipliers
+- Paddle hits steer the ball (English) by where it strikes the paddle; each serve adds small random angle and speed variation
 
 ## Known Limitations
 
 - Build and runtime paths are configured for this machine layout (`C:\winlibs-...`, `C:\SFML-3.0.2`).
 - On-screen HUD text needs a loadable font; if none load, fallback menu mode applies (see above).
 - No automated tests yet (Phase I uses manual verification).
-- Gameplay uses frame-dependent movement (no delta-time normalization).
+- Movement uses per-frame delta time so speed stays consistent if the frame rate changes.

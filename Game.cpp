@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <cmath>
 #include <filesystem>
+#include <random>
 #include <string>
 
 #include "GameConstants.h"
@@ -47,6 +48,12 @@ bool escapePressed(const sf::Event::KeyPressed& e) {
 bool backPressed(const sf::Event::KeyPressed& e) {
     return e.code == sf::Keyboard::Key::Backspace || e.scancode == sf::Keyboard::Scan::Backspace;
 }
+
+float randomRange(float lo, float hi) {
+    thread_local std::mt19937 gen{std::random_device{}()};
+    std::uniform_real_distribution<float> dist(lo, hi);
+    return dist(gen);
+}
 }  // namespace
 
 Game::Game()
@@ -57,11 +64,13 @@ Game::Game()
 
 void Game::run() {
     while (window.isOpen()) {
+        float dt = frameClock_.restart().asSeconds();
+        dt = std::clamp(dt, 1.f / 400.f, 0.05f);
         handleEvents();
         pollKeyboardShortcuts();
         window.clear(sf::Color(0, 0, 0));
-        handleInput();
-        update();
+        handleInput(dt);
+        update(dt);
         render();
         window.display();
     }
@@ -78,8 +87,7 @@ void Game::initialize() {
     ball.setOrigin({ball.getRadius(), ball.getRadius()});
     ball.setPosition({GameConstants::BallStartX, GameConstants::BallStartY});
 
-    physicsManager.setVelocity({GameConstants::BallInitialVelocityX * ballSpeedMultiplier,
-                                GameConstants::BallInitialVelocityY * ballSpeedMultiplier});
+    applyBallLaunchVelocity();
 
     initializeBricks();
 
@@ -253,12 +261,24 @@ void Game::processKeyPressed(const sf::Event::KeyPressed& key) {
     }
 }
 
-void Game::handleInput() {
+void Game::applyBallLaunchVelocity() {
+    const float baseSpeed = GameConstants::BallSpeedPxPerSec * ballSpeedMultiplier;
+    const float speedJitter =
+        1.f + randomRange(-GameConstants::BallServeSpeedJitter, GameConstants::BallServeSpeedJitter);
+    const float speed = baseSpeed * speedJitter;
+    const float angleJitterDeg =
+        randomRange(-GameConstants::BallServeAngleJitterDeg, GameConstants::BallServeAngleJitterDeg);
+    const float angleDeg = -45.f + angleJitterDeg;
+    const float rad = angleDeg * (3.14159265f / 180.f);
+    physicsManager.setVelocity({speed * std::cos(rad), speed * std::sin(rad)});
+}
+
+void Game::handleInput(float dt) {
     if (screenState != ScreenState::Game || gameState != GameState::Playing) {
         return;
     }
 
-    const float paddleStep = GameConstants::PaddleSpeed * paddleSpeedMultiplier;
+    const float paddleStep = GameConstants::PaddleSpeedPxPerSec * paddleSpeedMultiplier * dt;
     const float leftBound = GameConstants::BorderXOffset + (paddle.getSize().x / 2.f);
     const float rightBound =
         static_cast<float>(window.getSize().x) - (GameConstants::BorderXOffset + (paddle.getSize().x / 2.f));
@@ -276,13 +296,13 @@ void Game::handleInput() {
     }
 }
 
-void Game::update() {
+void Game::update(float dt) {
     if (screenState != ScreenState::Game || gameState != GameState::Playing) {
         return;
     }
 
     collidingBrickIndex.reset();
-    ball.setPosition(ball.getPosition() + physicsManager.getVelocity());
+    ball.setPosition(ball.getPosition() + physicsManager.getVelocity() * dt);
 
     if (ball.getPosition().x >=
             (static_cast<float>(window.getSize().x) - (GameConstants::BorderXOffset + ball.getRadius())) ||
@@ -297,10 +317,23 @@ void Game::update() {
     if (ball.getPosition().y >= (GameConstants::PaddleYPos - paddle.getSize().y) &&
         ((ball.getPosition().x > (paddle.getPosition().x - (paddle.getSize().x / 2.f))) &&
          (ball.getPosition().x < (paddle.getPosition().x + (paddle.getSize().x / 2.f))))) {
-        physicsManager.reflectY();
+        sf::Vector2f v = physicsManager.getVelocity();
+        float speed = std::hypot(v.x, v.y);
+        const float minSpeed = GameConstants::BallSpeedPxPerSec * ballSpeedMultiplier * 0.5f;
+        if (speed < minSpeed) {
+            speed = GameConstants::BallSpeedPxPerSec * ballSpeedMultiplier;
+        }
+        const float halfW = paddle.getSize().x * 0.5f;
+        const float hitT =
+            std::clamp((ball.getPosition().x - paddle.getPosition().x) / halfW, -1.f, 1.f);
+        const float maxRad = GameConstants::PaddleEnglishMaxAngleDeg * (3.14159265f / 180.f);
+        const float angle = hitT * maxRad;
+        const float newVx = std::sin(angle) * speed;
+        const float newVy = -std::cos(angle) * speed;
+        physicsManager.setVelocity({newVx, newVy});
     }
 
-    handleBrickCollision();
+    handleBrickCollision(dt);
     const int activeBrickCount = static_cast<int>(
         std::count_if(bricks.begin(), bricks.end(), [](const Brick& brick) { return brick.isActive; }));
     if (!GameHelpers::hasRemainingBricks(activeBrickCount)) {
@@ -321,8 +354,7 @@ void Game::update() {
 
 void Game::resetBall() {
     ball.setPosition({GameConstants::BallStartX, GameConstants::BallStartY});
-    physicsManager.setVelocity({GameConstants::BallInitialVelocityX * ballSpeedMultiplier,
-                                GameConstants::BallInitialVelocityY * ballSpeedMultiplier});
+    applyBallLaunchVelocity();
 }
 
 void Game::render() {
@@ -482,7 +514,7 @@ bool Game::ballIntersectsBrick(const Brick& brick) const {
     return ball.getGlobalBounds().findIntersection(brick.shape.getGlobalBounds()).has_value();
 }
 
-void Game::handleBrickCollision() {
+void Game::handleBrickCollision(float dt) {
     for (std::size_t index = 0; index < bricks.size(); ++index) {
         const Brick& brick = bricks[index];
         if (!brick.isActive) {
@@ -498,7 +530,7 @@ void Game::handleBrickCollision() {
         bricks[*collidingBrickIndex].isActive = false;
         score += 100;
         physicsManager.reflectY();
-        ball.setPosition(ball.getPosition() + physicsManager.getVelocity());
+        ball.setPosition(ball.getPosition() + physicsManager.getVelocity() * dt * 2.f);
     }
 }
 

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstddef>
+#include <SFML/System/Clock.hpp>
 #include <SFML/Graphics.hpp>
 #include <optional>
 #include <vector>
@@ -36,9 +37,10 @@ private:
     void resetBricks();
     void resetGame();
     void handleEvents();
-    void handleInput();
-    void update();
+    void handleInput(float dt);
+    void update(float dt);
     void resetBall();
+    void applyBallLaunchVelocity();
     void render();
     void renderMainMenu();
     void renderSettingsScreen();
@@ -47,9 +49,10 @@ private:
     void processKeyPressed(const sf::Event::KeyPressed& key);
     void pollKeyboardShortcuts();
     bool ballIntersectsBrick(const Brick& brick) const;
-    void handleBrickCollision();
+    void handleBrickCollision(float dt);
     void drawBorders();
 
+    sf::Clock frameClock_;
     sf::RenderWindow window;
     sf::RectangleShape paddle;
     sf::CircleShape ball;
