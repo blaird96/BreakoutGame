@@ -68,11 +68,11 @@ void Game::run() {
         dt = std::clamp(dt, 1.f / 400.f, 0.05f);
         handleEvents();
         pollKeyboardShortcuts();
+        handleMouseEvent();
         window.clear(sf::Color(0, 0, 0));
         handleInput(dt);
         update(dt);
-        render();
-        handleMouseClick();
+        render(); 
         window.display();
     }
 }
@@ -150,7 +150,7 @@ void Game::resetGame() {
     resetBall();
     paddle.setPosition({GameConstants::PaddleStartX, GameConstants::PaddleYPos});
     paddle.setFillColor(sf::Color::White);
-    gameState = GameState::Playing;
+    gameState = GameState::Paused;
 }
 
 void Game::handleEvents() {
@@ -165,7 +165,7 @@ void Game::handleEvents() {
     }
 }
 
-void Game::handleMouseClick(){
+void Game::handleMouseEvent(){
     auto mousePos = sf::Vector2f(sf::Mouse::getPosition(window));
     if(playBtn.getGlobalBounds().contains(mousePos)){
         if(sf::Mouse::isButtonPressed(sf::Mouse::Button::Left)){
@@ -174,7 +174,6 @@ void Game::handleMouseClick(){
         }
         mainMenuSelection = 0;
     }
-    //else{playBtn.setOutlineColor(sf::Color::Transparent);}
     if(settingsBtn.getGlobalBounds().contains(mousePos)){
         if(sf::Mouse::isButtonPressed(sf::Mouse::Button::Left)){
             screenState = ScreenState::Settings;
@@ -182,14 +181,12 @@ void Game::handleMouseClick(){
         }
         mainMenuSelection = 1;
     }
-    //else{settingsBtn.setOutlineColor(sf::Color::Transparent);}
     if(quitBtn.getGlobalBounds().contains(mousePos)){
         if(sf::Mouse::isButtonPressed(sf::Mouse::Button::Left)){
             window.close();
         }
         mainMenuSelection = 2;
     }
-    //else{quitBtn.setOutlineColor(sf::Color::Transparent);}
 }
 
 
@@ -304,7 +301,15 @@ void Game::applyBallLaunchVelocity() {
 
 void Game::handleInput(float dt) {
     if (screenState != ScreenState::Game || gameState != GameState::Playing) {
-        return;
+        if(gameState == GameState::Paused && (
+            sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Left) ||
+            sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A) ||  
+            sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Right) ||
+            sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D)
+        )){
+            gameState = GameState::Playing;
+        }
+        else{ return; }
     }
 
     const float paddleStep = GameConstants::PaddleSpeedPxPerSec * paddleSpeedMultiplier * dt;
@@ -383,6 +388,7 @@ void Game::update(float dt) {
 
 void Game::resetBall() {
     ball.setPosition({GameConstants::BallStartX, GameConstants::BallStartY});
+    gameState = GameState::Paused;
     applyBallLaunchVelocity();
 }
 

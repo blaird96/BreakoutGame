@@ -23,6 +23,7 @@ private:
 
     enum class GameState {
         Playing,
+        Paused,
         Won,
         GameOver
     };
@@ -48,7 +49,7 @@ private:
     void updateHudText();
     void processKeyPressed(const sf::Event::KeyPressed& key);
     void pollKeyboardShortcuts();
-    void handleMouseClick();
+    void handleMouseEvent();
     bool ballIntersectsBrick(const Brick& brick) const;
     void handleBrickCollision(float dt);
     void drawBorders();
