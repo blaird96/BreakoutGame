@@ -4,12 +4,33 @@
 #include <array>
 #include <cstdint>
 #include <cmath>
+#include <filesystem>
 #include <string>
 
 #include "GameConstants.h"
 #include "GameHelpers.h"
 
 namespace {
+bool tryLoadHudFont(sf::Font& font) {
+    namespace fs = std::filesystem;
+    const fs::path candidates[] = {
+        "assets/fonts/PressStart2P-Regular.ttf",
+        "C:/Windows/Fonts/arial.ttf",
+        "C:/Windows/Fonts/segoeui.ttf",
+        "C:/Windows/Fonts/calibri.ttf",
+    };
+    for (const fs::path& path : candidates) {
+        std::error_code ec;
+        if (!fs::exists(path, ec)) {
+            continue;
+        }
+        if (font.openFromFile(path)) {
+            return true;
+        }
+    }
+    return false;
+}
+
 bool keyOrScanDown(sf::Keyboard::Key key, sf::Keyboard::Scan scan) {
     return sf::Keyboard::isKeyPressed(key) || sf::Keyboard::isKeyPressed(scan);
 }
@@ -37,7 +58,7 @@ Game::Game()
 void Game::run() {
     while (window.isOpen()) {
         handleEvents();
-        pollTerminalStateKeyboard();
+        pollKeyboardShortcuts();
         window.clear(sf::Color(0, 0, 0));
         handleInput();
         update();
@@ -62,7 +83,7 @@ void Game::initialize() {
 
     initializeBricks();
 
-    if (hudFont.openFromFile("assets/fonts/PressStart2P-Regular.ttf")) {
+    if (tryLoadHudFont(hudFont)) {
         hasHudFont = true;
         scoreText.emplace(hudFont, "", 20);
         livesText.emplace(hudFont, "", 20);
@@ -79,8 +100,7 @@ void Game::initialize() {
         statusText.reset();
         menuTitleText.reset();
         menuLineText.reset();
-        screenState = ScreenState::Game;
-        resetGame();
+        screenState = ScreenState::MainMenu;
     }
 }
 
@@ -136,21 +156,23 @@ void Game::handleEvents() {
     }
 }
 
-void Game::pollTerminalStateKeyboard() {
-    const bool terminal =
-        screenState == ScreenState::Game &&
-        (gameState == GameState::Won || gameState == GameState::GameOver);
-
+void Game::pollKeyboardShortcuts() {
     const bool esc = keyOrScanDown(sf::Keyboard::Key::Escape, sf::Keyboard::Scan::Escape);
     const bool m = keyOrScanDown(sf::Keyboard::Key::M, sf::Keyboard::Scan::M);
     const bool r = keyOrScanDown(sf::Keyboard::Key::R, sf::Keyboard::Scan::R);
     const bool sp = keyOrScanDown(sf::Keyboard::Key::Space, sf::Keyboard::Scan::Space);
 
-    if (terminal) {
-        if ((esc && !prevEscDown_) || (m && !prevMDown_)) {
-            screenState = ScreenState::MainMenu;
-        } else if ((r && !prevRDown_) || (sp && !prevSpaceDown_)) {
-            resetGame();
+    if (screenState == ScreenState::Game) {
+        if (gameState == GameState::Playing) {
+            if (esc && !prevEscDown_) {
+                screenState = ScreenState::MainMenu;
+            }
+        } else {
+            if ((esc && !prevEscDown_) || (m && !prevMDown_)) {
+                screenState = ScreenState::MainMenu;
+            } else if ((r && !prevRDown_) || (sp && !prevSpaceDown_)) {
+                resetGame();
+            }
         }
     }
 
@@ -164,6 +186,15 @@ void Game::processKeyPressed(const sf::Event::KeyPressed& key) {
     const auto k = key.code;
 
     if (screenState == ScreenState::MainMenu) {
+        if (!hasHudFont) {
+            if (k == sf::Keyboard::Key::Num1) {
+                screenState = ScreenState::Game;
+                resetGame();
+            } else if (k == sf::Keyboard::Key::Num3) {
+                window.close();
+            }
+            return;
+        }
         if (k == sf::Keyboard::Key::Up) {
             mainMenuSelection = (mainMenuSelection + 2) % 3;
         } else if (k == sf::Keyboard::Key::Down) {
@@ -304,6 +335,8 @@ void Game::render() {
         return;
     }
 
+    window.setTitle(GameConstants::WindowTitle);
+
     drawBorders();
     renderBricks();
     window.draw(paddle);
@@ -320,7 +353,14 @@ void Game::render() {
 }
 
 void Game::renderMainMenu() {
-    if (!hasHudFont || !menuTitleText || !menuLineText) {
+    if (!hasHudFont) {
+        window.setTitle("Breakout | 1 Play | 3 Quit (no font; add assets/fonts or install Windows fonts)");
+        return;
+    }
+
+    window.setTitle(GameConstants::WindowTitle);
+
+    if (!menuTitleText || !menuLineText) {
         return;
     }
 

@@ -45,7 +45,7 @@ private:
     void renderBricks();
     void updateHudText();
     void processKeyPressed(const sf::Event::KeyPressed& key);
-    void pollTerminalStateKeyboard();
+    void pollKeyboardShortcuts();
     bool ballIntersectsBrick(const Brick& brick) const;
     void handleBrickCollision();
     void drawBorders();

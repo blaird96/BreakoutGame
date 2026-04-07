@@ -39,10 +39,14 @@ Extract the **SFML 3.0.2 GCC 14.2 MinGW 64-bit** package so you have:
 
 Download: [SFML 3.0.2](https://www.sfml-dev.org/download/sfml/3.0.2/)
 
-### 3) Optional HUD font
+### 3) HUD font (optional pixel font + automatic fallbacks)
 
-HUD text uses `assets/fonts/PressStart2P-Regular.ttf` when present.  
-If the file is missing, gameplay still runs and HUD text rendering is safely skipped.
+The game tries to load fonts in order (first path that exists wins):
+
+1. `assets/fonts/PressStart2P-Regular.ttf` (download [Press Start 2P](https://fonts.google.com/specimen/Press+Start+2P) and place the `.ttf` here)
+2. Common Windows fonts: `C:\Windows\Fonts\arial.ttf`, `segoeui.ttf`, or `calibri.ttf`
+
+Missing files are skipped **without** calling SFML on a bad path, so you should not see a font error for a missing asset. If **no** font loads, the main menu uses the **window title** for instructions and **1** / **3** number keys only (see Controls).
 
 ### 4) Custom install locations
 
@@ -79,7 +83,7 @@ From the repo root:
 ### Manual build command
 
 ```powershell
-C:\winlibs-x86_64-posix-seh-gcc-14.2.0-mingw-w64ucrt-12.0.0-r2\mingw64\bin\g++.exe -fdiagnostics-color=always -g -IC:\SFML-3.0.2\include .\main.cpp .\Game.cpp -LC:\SFML-3.0.2\lib -lsfml-graphics -lsfml-window -lsfml-system -o .\main.exe
+C:\winlibs-x86_64-posix-seh-gcc-14.2.0-mingw-w64ucrt-12.0.0-r2\mingw64\bin\g++.exe -std=c++20 -fdiagnostics-color=always -g -IC:\SFML-3.0.2\include .\main.cpp .\Game.cpp -LC:\SFML-3.0.2\lib -lsfml-graphics -lsfml-window -lsfml-system -o .\main.exe
 ```
 
 If you run `main.exe` by double-clicking, ensure **WinLibs** `mingw64\bin` and **SFML** `bin` are on your `PATH`, or use the script / VS Code launch configuration above.
@@ -101,8 +105,13 @@ If you run `main.exe` by double-clicking, ensure **WinLibs** `mingw64\bin` and *
 
 - `Left Arrow` or `A`: Move paddle left
 - `Right Arrow` or `D`: Move paddle right
-- `R` or `Space`: Start a new match (only when in Win or Game Over state)
-- `Esc` or `M`: Return to main menu (only when in Win or Game Over state)
+- `Esc`: Return to main menu (during active play, or from win/loss)
+- `R` or `Space`: Start a new match (**only** when in Win or Game Over state; ignored during active play)
+- `M`: Return to main menu (**only** when in Win or Game Over state)
+
+### No on-screen font (fallback mode)
+
+If no font file could be loaded, the window title shows **1 Play** and **3 Quit**. Settings are not available in this mode.
 
 If a key seems to do nothing, **click the game window** so it has keyboard focus (required for SFML to read the keyboard). After win/loss, menu and restart use **real-time key polling** with both logical keys and physical scancodes, so `Esc` / `M` work even when `KeyPressed` events are unreliable.
 
