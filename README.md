@@ -17,54 +17,72 @@ Phase I establishes a playable foundation of Breakout with:
 
 ## Setup Instructions (Windows)
 
-### 1) Install toolchain
+This repo is configured for a **WinLibs GCC 14.2** toolchain plus **SFML 3.0.2** built for the same MinGW flavor.
 
-Install:
+### 1) Toolchain (compiler)
 
-- MinGW GCC 14.2.0 (32-bit DW2 UCRT package)
-- SFML 3.0.2 (matching MinGW package)
+Use the WinLibs distribution at:
 
-Download from: [https://www.sfml-dev.org/download/sfml/3.0.2/](https://www.sfml-dev.org/download/sfml/3.0.2/)
+- `C:\winlibs-x86_64-posix-seh-gcc-14.2.0-mingw-w64ucrt-12.0.0-r2\mingw64\bin`
 
-### 2) Place dependencies
+That folder should contain `g++.exe`, `gdb.exe`, and the runtime DLLs MinGW links against.
 
-Extract and place these folders at the root of `C:\`:
+Optional: you can also install **MSYS2** for a separate `g++`, but the **VS Code build task** in this repo targets WinLibs so it matches the SFML prebuilt binaries.
 
-- `C:\mingw32`
-- `C:\SFML-3.0.2`
+### 2) SFML
 
-### 3) Add compiler to PATH
+Extract the **SFML 3.0.2 GCC 14.2 MinGW 64-bit** package so you have:
 
-Add `C:\mingw32\bin` to the user PATH environment variable.
+- `C:\SFML-3.0.2\include`
+- `C:\SFML-3.0.2\lib`
+- `C:\SFML-3.0.2\bin` (SFML DLLs)
 
-Verify:
+Download: [SFML 3.0.2](https://www.sfml-dev.org/download/sfml/3.0.2/)
 
-```powershell
-g++ --version
-```
-
-### 4) Optional HUD font
+### 3) Optional HUD font
 
 HUD text uses `assets/fonts/PressStart2P-Regular.ttf` when present.  
 If the file is missing, gameplay still runs and HUD text rendering is safely skipped.
 
+### 4) Custom install locations
+
+If your paths differ, update:
+
+- `.vscode/tasks.json` (compiler and `-I` / `-L` flags)
+- `.vscode/c_cpp_properties.json` (IntelliSense include path and `compilerPath`)
+- `.vscode/launch.json` and `.vscode/settings.json` (PATH entries for runtime)
+- `scripts/run-game.ps1` (PATH entries)
+
 ## Build and Run
 
-### VS Code task (recommended)
+### VS Code (recommended)
 
-Use the default C++ build task configured in `.vscode/tasks.json`, then run `main.exe`.
+1. Open this folder in VS Code.
+2. **Build:** `Terminal` → `Run Build Task` (default build compiles `main.cpp` and `Game.cpp` to `main.exe`).
+3. **Run / debug:** `Run` → `Start Debugging` (or F5), configuration **Breakout: Debug (WinLibs + SFML)**.  
+   This builds first, then launches `main.exe` with WinLibs and SFML on `PATH` so DLLs resolve.
 
-### Manual build command
-
-```powershell
-C:\mingw32\bin\g++.exe -fdiagnostics-color=always -g -IC:\SFML-3.0.2\include .\main.cpp .\Game.cpp -LC:\SFML-3.0.2\lib -lsfml-graphics -lsfml-window -lsfml-system -o .\main.exe
-```
-
-Run:
+The integrated terminal is also configured (workspace settings) so after a successful build you can run:
 
 ```powershell
 .\main.exe
 ```
+
+### Script (outside VS Code)
+
+From the repo root:
+
+```powershell
+.\scripts\run-game.ps1
+```
+
+### Manual build command
+
+```powershell
+C:\winlibs-x86_64-posix-seh-gcc-14.2.0-mingw-w64ucrt-12.0.0-r2\mingw64\bin\g++.exe -fdiagnostics-color=always -g -IC:\SFML-3.0.2\include .\main.cpp .\Game.cpp -LC:\SFML-3.0.2\lib -lsfml-graphics -lsfml-window -lsfml-system -o .\main.exe
+```
+
+If you run `main.exe` by double-clicking, ensure **WinLibs** `mingw64\bin` and **SFML** `bin` are on your `PATH`, or use the script / VS Code launch configuration above.
 
 ## Controls
 
@@ -88,7 +106,7 @@ Run:
 
 ## Known Limitations
 
-- Build paths are currently hardcoded for Windows (`C:\mingw32`, `C:\SFML-3.0.2`).
+- Build and runtime paths are configured for this machine layout (`C:\winlibs-...`, `C:\SFML-3.0.2`).
 - HUD requires a local font file to render text.
 - No automated tests yet (Phase I uses manual verification).
 - Gameplay uses frame-dependent movement (no delta-time normalization).
