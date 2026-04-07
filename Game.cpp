@@ -41,17 +41,17 @@ void Game::initialize() {
 
     if (hudFont.openFromFile("assets/fonts/PressStart2P-Regular.ttf")) {
         hasHudFont = true;
-        scoreText.setFont(hudFont);
-        livesText.setFont(hudFont);
-        statusText.setFont(hudFont);
-        scoreText.setCharacterSize(20);
-        livesText.setCharacterSize(20);
-        statusText.setCharacterSize(32);
-        scoreText.setFillColor(sf::Color::White);
-        livesText.setFillColor(sf::Color::White);
-        statusText.setFillColor(sf::Color::White);
+        scoreText.emplace(hudFont, "", 20);
+        livesText.emplace(hudFont, "", 20);
+        statusText.emplace(hudFont, "", 32);
+        scoreText->setFillColor(sf::Color::White);
+        livesText->setFillColor(sf::Color::White);
+        statusText->setFillColor(sf::Color::White);
     } else {
         hasHudFont = false;
+        scoreText.reset();
+        livesText.reset();
+        statusText.reset();
     }
 }
 
@@ -186,11 +186,11 @@ void Game::render() {
     window.draw(ball);
     updateHudText();
 
-    if (hasHudFont) {
-        window.draw(scoreText);
-        window.draw(livesText);
+    if (hasHudFont && scoreText && livesText && statusText) {
+        window.draw(*scoreText);
+        window.draw(*livesText);
         if (gameState != GameState::Playing) {
-            window.draw(statusText);
+            window.draw(*statusText);
         }
     }
 }
@@ -204,23 +204,23 @@ void Game::renderBricks() {
 }
 
 void Game::updateHudText() {
-    if (!hasHudFont) {
+    if (!hasHudFont || !scoreText || !livesText || !statusText) {
         return;
     }
 
-    scoreText.setString("Score: " + std::to_string(score));
-    livesText.setString("Lives: " + std::to_string(gameManager.getLives()));
-    scoreText.setPosition({GameConstants::BorderXOffset + 10.f, GameConstants::WindowHeight - 40.f});
-    livesText.setPosition({GameConstants::WindowWidth - 170.f, GameConstants::WindowHeight - 40.f});
+    scoreText->setString("Score: " + std::to_string(score));
+    livesText->setString("Lives: " + std::to_string(gameManager.getLives()));
+    scoreText->setPosition({GameConstants::BorderXOffset + 10.f, GameConstants::WindowHeight - 40.f});
+    livesText->setPosition({GameConstants::WindowWidth - 170.f, GameConstants::WindowHeight - 40.f});
 
     if (gameState == GameState::Won) {
-        statusText.setString("YOU WIN!");
-        statusText.setPosition({220.f, 420.f});
+        statusText->setString("YOU WIN!");
+        statusText->setPosition({220.f, 420.f});
     } else if (gameState == GameState::GameOver) {
-        statusText.setString("GAME OVER");
-        statusText.setPosition({170.f, 420.f});
+        statusText->setString("GAME OVER");
+        statusText->setPosition({170.f, 420.f});
     } else {
-        statusText.setString("");
+        statusText->setString("");
     }
 }
 

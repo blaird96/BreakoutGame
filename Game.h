@@ -44,9 +44,9 @@ private:
     sf::RectangleShape paddle;
     sf::CircleShape ball;
     sf::Font hudFont;
-    sf::Text scoreText;
-    sf::Text livesText;
-    sf::Text statusText;
+    std::optional<sf::Text> scoreText;
+    std::optional<sf::Text> livesText;
+    std::optional<sf::Text> statusText;
     bool hasHudFont = false;
     std::vector<Brick> bricks;
     int score = 0;
