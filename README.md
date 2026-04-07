@@ -86,9 +86,23 @@ If you run `main.exe` by double-clicking, ensure **WinLibs** `mingw64\bin` and *
 
 ## Controls
 
+### Main menu
+
+- `Up` / `Down`: Move selection
+- `Enter`: Choose Play, Settings, or Quit
+
+### Settings
+
+- `Up` / `Down`: Select Paddle speed, Ball speed, or Back
+- `Left` / `Right`: Decrease or increase speed (50% to 200% of defaults)
+- `Enter` or `Esc`: Back to main menu (when **Back** is highlighted, `Enter` also returns)
+
+### In game
+
 - `Left Arrow` or `A`: Move paddle left
 - `Right Arrow` or `D`: Move paddle right
-- `R`: Restart game (only when in Win or Game Over state)
+- `R`: Restart match (only when in Win or Game Over state)
+- `Esc`: Return to main menu (only when in Win or Game Over state)
 
 ## Features Implemented in Phase I
 
@@ -103,6 +117,7 @@ If you run `main.exe` by double-clicking, ensure **WinLibs** `mingw64\bin` and *
 - Terminal-state gameplay pause
 - HUD support for score, lives, and result text
 - Full-state reset for restart flow
+- Main menu and settings screen for paddle and ball speed multipliers
 
 ## Known Limitations
 

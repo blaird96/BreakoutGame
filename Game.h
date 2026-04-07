@@ -14,6 +14,12 @@ public:
     void run();
 
 private:
+    enum class ScreenState {
+        MainMenu,
+        Settings,
+        Game
+    };
+
     enum class GameState {
         Playing,
         Won,
@@ -34,8 +40,11 @@ private:
     void update();
     void resetBall();
     void render();
+    void renderMainMenu();
+    void renderSettingsScreen();
     void renderBricks();
     void updateHudText();
+    void processKeyPressed(const sf::Event::KeyPressed& key);
     bool ballIntersectsBrick(const Brick& brick) const;
     void handleBrickCollision();
     void drawBorders();
@@ -48,6 +57,13 @@ private:
     std::optional<sf::Text> livesText;
     std::optional<sf::Text> statusText;
     bool hasHudFont = false;
+    std::optional<sf::Text> menuTitleText;
+    std::optional<sf::Text> menuLineText;
+    ScreenState screenState = ScreenState::MainMenu;
+    int mainMenuSelection = 0;
+    int settingsSelection = 0;
+    float paddleSpeedMultiplier = 1.f;
+    float ballSpeedMultiplier = 1.f;
     std::vector<Brick> bricks;
     int score = 0;
     GameState gameState = GameState::Playing;

@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <array>
 #include <cstdint>
+#include <cmath>
 #include <string>
 
 #include "GameConstants.h"
@@ -34,8 +35,8 @@ void Game::initialize() {
     ball.setOrigin({ball.getRadius(), ball.getRadius()});
     ball.setPosition({GameConstants::BallStartX, GameConstants::BallStartY});
 
-    physicsManager.setVelocity(
-        {GameConstants::BallInitialVelocityX, GameConstants::BallInitialVelocityY});
+    physicsManager.setVelocity({GameConstants::BallInitialVelocityX * ballSpeedMultiplier,
+                                GameConstants::BallInitialVelocityY * ballSpeedMultiplier});
 
     initializeBricks();
 
@@ -47,11 +48,17 @@ void Game::initialize() {
         scoreText->setFillColor(sf::Color::White);
         livesText->setFillColor(sf::Color::White);
         statusText->setFillColor(sf::Color::White);
+        menuTitleText.emplace(hudFont, "", 40);
+        menuLineText.emplace(hudFont, "", 22);
     } else {
         hasHudFont = false;
         scoreText.reset();
         livesText.reset();
         statusText.reset();
+        menuTitleText.reset();
+        menuLineText.reset();
+        screenState = ScreenState::Game;
+        resetGame();
     }
 }
 
@@ -102,18 +109,89 @@ void Game::handleEvents() {
         }
 
         if (const auto* keyPressed = event->getIf<sf::Event::KeyPressed>()) {
-            if (keyPressed->code == sf::Keyboard::Key::R && gameState != GameState::Playing) {
+            processKeyPressed(*keyPressed);
+        }
+    }
+}
+
+void Game::processKeyPressed(const sf::Event::KeyPressed& key) {
+    const auto k = key.code;
+
+    if (screenState == ScreenState::MainMenu) {
+        if (k == sf::Keyboard::Key::Up) {
+            mainMenuSelection = (mainMenuSelection + 2) % 3;
+        } else if (k == sf::Keyboard::Key::Down) {
+            mainMenuSelection = (mainMenuSelection + 1) % 3;
+        } else if (k == sf::Keyboard::Key::Enter) {
+            if (mainMenuSelection == 0) {
+                screenState = ScreenState::Game;
                 resetGame();
+            } else if (mainMenuSelection == 1) {
+                screenState = ScreenState::Settings;
+                settingsSelection = 0;
+            } else {
+                window.close();
             }
+        }
+        return;
+    }
+
+    if (screenState == ScreenState::Settings) {
+        if (k == sf::Keyboard::Key::Escape) {
+            screenState = ScreenState::MainMenu;
+            return;
+        }
+        if (k == sf::Keyboard::Key::Up) {
+            settingsSelection = (settingsSelection + 2) % 3;
+        } else if (k == sf::Keyboard::Key::Down) {
+            settingsSelection = (settingsSelection + 1) % 3;
+        } else if (k == sf::Keyboard::Key::Left) {
+            if (settingsSelection == 0) {
+                paddleSpeedMultiplier = std::clamp(
+                    paddleSpeedMultiplier - GameConstants::SpeedMultiplierStep,
+                    GameConstants::MinSpeedMultiplier,
+                    GameConstants::MaxSpeedMultiplier);
+            } else if (settingsSelection == 1) {
+                ballSpeedMultiplier = std::clamp(
+                    ballSpeedMultiplier - GameConstants::SpeedMultiplierStep,
+                    GameConstants::MinSpeedMultiplier,
+                    GameConstants::MaxSpeedMultiplier);
+            }
+        } else if (k == sf::Keyboard::Key::Right) {
+            if (settingsSelection == 0) {
+                paddleSpeedMultiplier = std::clamp(
+                    paddleSpeedMultiplier + GameConstants::SpeedMultiplierStep,
+                    GameConstants::MinSpeedMultiplier,
+                    GameConstants::MaxSpeedMultiplier);
+            } else if (settingsSelection == 1) {
+                ballSpeedMultiplier = std::clamp(
+                    ballSpeedMultiplier + GameConstants::SpeedMultiplierStep,
+                    GameConstants::MinSpeedMultiplier,
+                    GameConstants::MaxSpeedMultiplier);
+            }
+        } else if (k == sf::Keyboard::Key::Enter && settingsSelection == 2) {
+            screenState = ScreenState::MainMenu;
+        }
+        return;
+    }
+
+    if (screenState == ScreenState::Game) {
+        if (k == sf::Keyboard::Key::R && gameState != GameState::Playing) {
+            resetGame();
+        }
+        if (k == sf::Keyboard::Key::Escape &&
+            (gameState == GameState::Won || gameState == GameState::GameOver)) {
+            screenState = ScreenState::MainMenu;
         }
     }
 }
 
 void Game::handleInput() {
-    if (gameState != GameState::Playing) {
+    if (screenState != ScreenState::Game || gameState != GameState::Playing) {
         return;
     }
 
+    const float paddleStep = GameConstants::PaddleSpeed * paddleSpeedMultiplier;
     const float leftBound = GameConstants::BorderXOffset + (paddle.getSize().x / 2.f);
     const float rightBound =
         static_cast<float>(window.getSize().x) - (GameConstants::BorderXOffset + (paddle.getSize().x / 2.f));
@@ -121,18 +199,18 @@ void Game::handleInput() {
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Left) ||
         sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A)) {
         const float nextX = GameHelpers::clampPaddlePosition(
-            paddle.getPosition().x - GameConstants::PaddleSpeed, leftBound, rightBound);
+            paddle.getPosition().x - paddleStep, leftBound, rightBound);
         paddle.setPosition({nextX, GameConstants::PaddleYPos});
     } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Right) ||
                sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D)) {
         const float nextX = GameHelpers::clampPaddlePosition(
-            paddle.getPosition().x + GameConstants::PaddleSpeed, leftBound, rightBound);
+            paddle.getPosition().x + paddleStep, leftBound, rightBound);
         paddle.setPosition({nextX, GameConstants::PaddleYPos});
     }
 }
 
 void Game::update() {
-    if (gameState != GameState::Playing) {
+    if (screenState != ScreenState::Game || gameState != GameState::Playing) {
         return;
     }
 
@@ -176,10 +254,20 @@ void Game::update() {
 
 void Game::resetBall() {
     ball.setPosition({GameConstants::BallStartX, GameConstants::BallStartY});
-    physicsManager.setVelocity({GameConstants::BallInitialVelocityX, GameConstants::BallInitialVelocityY});
+    physicsManager.setVelocity({GameConstants::BallInitialVelocityX * ballSpeedMultiplier,
+                                GameConstants::BallInitialVelocityY * ballSpeedMultiplier});
 }
 
 void Game::render() {
+    if (screenState == ScreenState::MainMenu) {
+        renderMainMenu();
+        return;
+    }
+    if (screenState == ScreenState::Settings) {
+        renderSettingsScreen();
+        return;
+    }
+
     drawBorders();
     renderBricks();
     window.draw(paddle);
@@ -193,6 +281,86 @@ void Game::render() {
             window.draw(*statusText);
         }
     }
+}
+
+void Game::renderMainMenu() {
+    if (!hasHudFont || !menuTitleText || !menuLineText) {
+        return;
+    }
+
+    const float cx = static_cast<float>(window.getSize().x) / 2.f;
+    menuTitleText->setString("BREAKOUT");
+    menuTitleText->setFillColor(sf::Color::White);
+    {
+        const sf::FloatRect b = menuTitleText->getLocalBounds();
+        menuTitleText->setOrigin({b.position.x + b.size.x / 2.f, b.position.y + b.size.y / 2.f});
+    }
+    menuTitleText->setPosition({cx, 200.f});
+    window.draw(*menuTitleText);
+
+    const char* labels[3] = {"Play", "Settings", "Quit"};
+    for (int i = 0; i < 3; ++i) {
+        menuLineText->setString(labels[i]);
+        menuLineText->setFillColor(i == mainMenuSelection ? sf::Color::Yellow : sf::Color::White);
+        const sf::FloatRect b = menuLineText->getLocalBounds();
+        menuLineText->setOrigin({b.position.x + b.size.x / 2.f, b.position.y + b.size.y / 2.f});
+        menuLineText->setPosition({cx, 340.f + (i * 50.f)});
+        window.draw(*menuLineText);
+    }
+
+    menuLineText->setString("Up/Down: navigate   Enter: select");
+    menuLineText->setFillColor(sf::Color(180, 180, 180));
+    {
+        const sf::FloatRect b = menuLineText->getLocalBounds();
+        menuLineText->setOrigin({b.position.x + b.size.x / 2.f, b.position.y + b.size.y / 2.f});
+    }
+    menuLineText->setPosition({cx, 720.f});
+    window.draw(*menuLineText);
+}
+
+void Game::renderSettingsScreen() {
+    if (!hasHudFont || !menuTitleText || !menuLineText) {
+        return;
+    }
+
+    const float cx = static_cast<float>(window.getSize().x) / 2.f;
+    menuTitleText->setString("SETTINGS");
+    menuTitleText->setFillColor(sf::Color::White);
+    {
+        const sf::FloatRect b = menuTitleText->getLocalBounds();
+        menuTitleText->setOrigin({b.position.x + b.size.x / 2.f, b.position.y + b.size.y / 2.f});
+    }
+    menuTitleText->setPosition({cx, 160.f});
+    window.draw(*menuTitleText);
+
+    auto pct = [](float m) {
+        return static_cast<int>(std::lround(m * 100.f));
+    };
+
+    std::string line0 =
+        "Paddle speed: " + std::to_string(pct(paddleSpeedMultiplier)) + "%  (Left/Right)";
+    std::string line1 =
+        "Ball speed: " + std::to_string(pct(ballSpeedMultiplier)) + "%  (Left/Right)";
+    const char* line2 = "Back to menu";
+
+    const std::string lines[3] = {line0, line1, line2};
+    for (int i = 0; i < 3; ++i) {
+        menuLineText->setString(lines[i]);
+        menuLineText->setFillColor(i == settingsSelection ? sf::Color::Yellow : sf::Color::White);
+        const sf::FloatRect b = menuLineText->getLocalBounds();
+        menuLineText->setOrigin({b.position.x + b.size.x / 2.f, b.position.y + b.size.y / 2.f});
+        menuLineText->setPosition({cx, 300.f + (i * 60.f)});
+        window.draw(*menuLineText);
+    }
+
+    menuLineText->setString("Up/Down: row   Left/Right: adjust   Enter/Esc: back");
+    menuLineText->setFillColor(sf::Color(180, 180, 180));
+    {
+        const sf::FloatRect b = menuLineText->getLocalBounds();
+        menuLineText->setOrigin({b.position.x + b.size.x / 2.f, b.position.y + b.size.y / 2.f});
+    }
+    menuLineText->setPosition({cx, 720.f});
+    window.draw(*menuLineText);
 }
 
 void Game::renderBricks() {

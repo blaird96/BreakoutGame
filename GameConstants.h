@@ -30,4 +30,8 @@ constexpr float BrickWidth = 88.f;
 constexpr float BrickHeight = 28.f;
 constexpr float BrickSpacing = 8.f;
 constexpr float BrickTopOffset = 80.f;
+
+constexpr float MinSpeedMultiplier = 0.5f;
+constexpr float MaxSpeedMultiplier = 2.0f;
+constexpr float SpeedMultiplierStep = 0.1f;
 }  // namespace GameConstants
