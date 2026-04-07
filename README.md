@@ -104,7 +104,9 @@ If you run `main.exe` by double-clicking, ensure **WinLibs** `mingw64\bin` and *
 - `R` or `Space`: Start a new match (only when in Win or Game Over state)
 - `Esc` or `M`: Return to main menu (only when in Win or Game Over state)
 
-If a key seems to do nothing, click the game window so it has keyboard focus. Some editors capture `Esc` while debugging; use **`M`** for menu or run `main.exe` outside the IDE.
+If a key seems to do nothing, **click the game window** so it has keyboard focus (required for SFML to read the keyboard). After win/loss, menu and restart use **real-time key polling** with both logical keys and physical scancodes, so `Esc` / `M` work even when `KeyPressed` events are unreliable.
+
+Some editors still capture `Esc` while debugging; use **`M`** for menu, or run `main.exe` outside the IDE.
 
 ## Features Implemented in Phase I
 

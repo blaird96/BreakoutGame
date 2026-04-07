@@ -45,6 +45,7 @@ private:
     void renderBricks();
     void updateHudText();
     void processKeyPressed(const sf::Event::KeyPressed& key);
+    void pollTerminalStateKeyboard();
     bool ballIntersectsBrick(const Brick& brick) const;
     void handleBrickCollision();
     void drawBorders();
@@ -70,4 +71,9 @@ private:
     std::optional<std::size_t> collidingBrickIndex;
     PhysicsManager physicsManager;
     GameManager gameManager;
+
+    bool prevEscDown_ = false;
+    bool prevMDown_ = false;
+    bool prevRDown_ = false;
+    bool prevSpaceDown_ = false;
 };

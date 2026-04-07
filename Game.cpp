@@ -10,6 +10,10 @@
 #include "GameHelpers.h"
 
 namespace {
+bool keyOrScanDown(sf::Keyboard::Key key, sf::Keyboard::Scan scan) {
+    return sf::Keyboard::isKeyPressed(key) || sf::Keyboard::isKeyPressed(scan);
+}
+
 bool enterPressed(const sf::Event::KeyPressed& e) {
     return e.code == sf::Keyboard::Key::Enter || e.scancode == sf::Keyboard::Scan::Enter ||
            e.scancode == sf::Keyboard::Scan::NumpadEnter;
@@ -17,18 +21,6 @@ bool enterPressed(const sf::Event::KeyPressed& e) {
 
 bool escapePressed(const sf::Event::KeyPressed& e) {
     return e.code == sf::Keyboard::Key::Escape || e.scancode == sf::Keyboard::Scan::Escape;
-}
-
-bool rPressed(const sf::Event::KeyPressed& e) {
-    return e.code == sf::Keyboard::Key::R || e.scancode == sf::Keyboard::Scan::R;
-}
-
-bool mPressed(const sf::Event::KeyPressed& e) {
-    return e.code == sf::Keyboard::Key::M || e.scancode == sf::Keyboard::Scan::M;
-}
-
-bool spacePressed(const sf::Event::KeyPressed& e) {
-    return e.code == sf::Keyboard::Key::Space || e.scancode == sf::Keyboard::Scan::Space;
 }
 
 bool backPressed(const sf::Event::KeyPressed& e) {
@@ -45,6 +37,7 @@ Game::Game()
 void Game::run() {
     while (window.isOpen()) {
         handleEvents();
+        pollTerminalStateKeyboard();
         window.clear(sf::Color(0, 0, 0));
         handleInput();
         update();
@@ -143,6 +136,30 @@ void Game::handleEvents() {
     }
 }
 
+void Game::pollTerminalStateKeyboard() {
+    const bool terminal =
+        screenState == ScreenState::Game &&
+        (gameState == GameState::Won || gameState == GameState::GameOver);
+
+    const bool esc = keyOrScanDown(sf::Keyboard::Key::Escape, sf::Keyboard::Scan::Escape);
+    const bool m = keyOrScanDown(sf::Keyboard::Key::M, sf::Keyboard::Scan::M);
+    const bool r = keyOrScanDown(sf::Keyboard::Key::R, sf::Keyboard::Scan::R);
+    const bool sp = keyOrScanDown(sf::Keyboard::Key::Space, sf::Keyboard::Scan::Space);
+
+    if (terminal) {
+        if ((esc && !prevEscDown_) || (m && !prevMDown_)) {
+            screenState = ScreenState::MainMenu;
+        } else if ((r && !prevRDown_) || (sp && !prevSpaceDown_)) {
+            resetGame();
+        }
+    }
+
+    prevEscDown_ = esc;
+    prevMDown_ = m;
+    prevRDown_ = r;
+    prevSpaceDown_ = sp;
+}
+
 void Game::processKeyPressed(const sf::Event::KeyPressed& key) {
     const auto k = key.code;
 
@@ -202,17 +219,6 @@ void Game::processKeyPressed(const sf::Event::KeyPressed& key) {
             screenState = ScreenState::MainMenu;
         }
         return;
-    }
-
-    if (screenState == ScreenState::Game) {
-        const bool terminal = (gameState == GameState::Won || gameState == GameState::GameOver);
-        if (terminal) {
-            if (rPressed(key) || spacePressed(key)) {
-                resetGame();
-            } else if (escapePressed(key) || mPressed(key)) {
-                screenState = ScreenState::MainMenu;
-            }
-        }
     }
 }
 
