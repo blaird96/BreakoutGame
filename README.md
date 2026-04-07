@@ -89,20 +89,22 @@ If you run `main.exe` by double-clicking, ensure **WinLibs** `mingw64\bin` and *
 ### Main menu
 
 - `Up` / `Down`: Move selection
-- `Enter`: Choose Play, Settings, or Quit
+- `Enter` (main or numpad): Choose Play, Settings, or Quit
 
 ### Settings
 
 - `Up` / `Down`: Select Paddle speed, Ball speed, or Back
 - `Left` / `Right`: Decrease or increase speed (50% to 200% of defaults)
-- `Enter` or `Esc`: Back to main menu (when **Back** is highlighted, `Enter` also returns)
+- `Enter` / `Esc` / `Backspace`: Back to main menu (or choose **Back** and press `Enter`)
 
 ### In game
 
 - `Left Arrow` or `A`: Move paddle left
 - `Right Arrow` or `D`: Move paddle right
-- `R`: Restart match (only when in Win or Game Over state)
-- `Esc`: Return to main menu (only when in Win or Game Over state)
+- `R` or `Space`: Start a new match (only when in Win or Game Over state)
+- `Esc` or `M`: Return to main menu (only when in Win or Game Over state)
+
+If a key seems to do nothing, click the game window so it has keyboard focus. Some editors capture `Esc` while debugging; use **`M`** for menu or run `main.exe` outside the IDE.
 
 ## Features Implemented in Phase I
 

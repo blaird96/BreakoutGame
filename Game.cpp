@@ -9,6 +9,33 @@
 #include "GameConstants.h"
 #include "GameHelpers.h"
 
+namespace {
+bool enterPressed(const sf::Event::KeyPressed& e) {
+    return e.code == sf::Keyboard::Key::Enter || e.scancode == sf::Keyboard::Scan::Enter ||
+           e.scancode == sf::Keyboard::Scan::NumpadEnter;
+}
+
+bool escapePressed(const sf::Event::KeyPressed& e) {
+    return e.code == sf::Keyboard::Key::Escape || e.scancode == sf::Keyboard::Scan::Escape;
+}
+
+bool rPressed(const sf::Event::KeyPressed& e) {
+    return e.code == sf::Keyboard::Key::R || e.scancode == sf::Keyboard::Scan::R;
+}
+
+bool mPressed(const sf::Event::KeyPressed& e) {
+    return e.code == sf::Keyboard::Key::M || e.scancode == sf::Keyboard::Scan::M;
+}
+
+bool spacePressed(const sf::Event::KeyPressed& e) {
+    return e.code == sf::Keyboard::Key::Space || e.scancode == sf::Keyboard::Scan::Space;
+}
+
+bool backPressed(const sf::Event::KeyPressed& e) {
+    return e.code == sf::Keyboard::Key::Backspace || e.scancode == sf::Keyboard::Scan::Backspace;
+}
+}  // namespace
+
 Game::Game()
     : window(sf::VideoMode({GameConstants::WindowWidth, GameConstants::WindowHeight}),
              GameConstants::WindowTitle) {
@@ -27,6 +54,8 @@ void Game::run() {
 }
 
 void Game::initialize() {
+    window.setKeyRepeatEnabled(false);
+
     paddle.setSize({GameConstants::PaddleWidth, GameConstants::PaddleHeight});
     paddle.setOrigin({GameConstants::PaddleHalfWidth, GameConstants::PaddleHalfHeight});
     paddle.setPosition({GameConstants::PaddleStartX, GameConstants::PaddleYPos});
@@ -122,7 +151,7 @@ void Game::processKeyPressed(const sf::Event::KeyPressed& key) {
             mainMenuSelection = (mainMenuSelection + 2) % 3;
         } else if (k == sf::Keyboard::Key::Down) {
             mainMenuSelection = (mainMenuSelection + 1) % 3;
-        } else if (k == sf::Keyboard::Key::Enter) {
+        } else if (enterPressed(key)) {
             if (mainMenuSelection == 0) {
                 screenState = ScreenState::Game;
                 resetGame();
@@ -137,7 +166,7 @@ void Game::processKeyPressed(const sf::Event::KeyPressed& key) {
     }
 
     if (screenState == ScreenState::Settings) {
-        if (k == sf::Keyboard::Key::Escape) {
+        if (escapePressed(key) || backPressed(key)) {
             screenState = ScreenState::MainMenu;
             return;
         }
@@ -169,19 +198,20 @@ void Game::processKeyPressed(const sf::Event::KeyPressed& key) {
                     GameConstants::MinSpeedMultiplier,
                     GameConstants::MaxSpeedMultiplier);
             }
-        } else if (k == sf::Keyboard::Key::Enter && settingsSelection == 2) {
+        } else if (enterPressed(key) && settingsSelection == 2) {
             screenState = ScreenState::MainMenu;
         }
         return;
     }
 
     if (screenState == ScreenState::Game) {
-        if (k == sf::Keyboard::Key::R && gameState != GameState::Playing) {
-            resetGame();
-        }
-        if (k == sf::Keyboard::Key::Escape &&
-            (gameState == GameState::Won || gameState == GameState::GameOver)) {
-            screenState = ScreenState::MainMenu;
+        const bool terminal = (gameState == GameState::Won || gameState == GameState::GameOver);
+        if (terminal) {
+            if (rPressed(key) || spacePressed(key)) {
+                resetGame();
+            } else if (escapePressed(key) || mPressed(key)) {
+                screenState = ScreenState::MainMenu;
+            }
         }
     }
 }
@@ -381,13 +411,23 @@ void Game::updateHudText() {
     scoreText->setPosition({GameConstants::BorderXOffset + 10.f, GameConstants::WindowHeight - 40.f});
     livesText->setPosition({GameConstants::WindowWidth - 170.f, GameConstants::WindowHeight - 40.f});
 
+    const float cx = static_cast<float>(window.getSize().x) / 2.f;
+
     if (gameState == GameState::Won) {
-        statusText->setString("YOU WIN!");
-        statusText->setPosition({220.f, 420.f});
+        statusText->setCharacterSize(20);
+        statusText->setString("YOU WIN!\nR / Space: play again     M / Esc: menu");
+        const sf::FloatRect b = statusText->getLocalBounds();
+        statusText->setOrigin({b.position.x + b.size.x / 2.f, b.position.y + b.size.y / 2.f});
+        statusText->setPosition({cx, 400.f});
     } else if (gameState == GameState::GameOver) {
-        statusText->setString("GAME OVER");
-        statusText->setPosition({170.f, 420.f});
+        statusText->setCharacterSize(20);
+        statusText->setString("GAME OVER\nR / Space: try again     M / Esc: menu");
+        const sf::FloatRect b = statusText->getLocalBounds();
+        statusText->setOrigin({b.position.x + b.size.x / 2.f, b.position.y + b.size.y / 2.f});
+        statusText->setPosition({cx, 400.f});
     } else {
+        statusText->setCharacterSize(32);
+        statusText->setOrigin({0.f, 0.f});
         statusText->setString("");
     }
 }
