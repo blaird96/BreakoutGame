@@ -32,23 +32,38 @@ bool tryLoadHudFont(sf::Font& font) {
     return false;
 }
 
+/**
+ * Return true if the passed key is down either in key or scan form, false if not
+ */
 bool keyOrScanDown(sf::Keyboard::Key key, sf::Keyboard::Scan scan) {
     return sf::Keyboard::isKeyPressed(key) || sf::Keyboard::isKeyPressed(scan);
 }
 
+/**
+ * If enter is pressed via Key or scan or numpad enter return true, else return false
+ */
 bool enterPressed(const sf::Event::KeyPressed& e) {
     return e.code == sf::Keyboard::Key::Enter || e.scancode == sf::Keyboard::Scan::Enter ||
            e.scancode == sf::Keyboard::Scan::NumpadEnter;
 }
 
+/**
+ * If escape is pressed via scan or key, return true, else return false
+ */
 bool escapePressed(const sf::Event::KeyPressed& e) {
     return e.code == sf::Keyboard::Key::Escape || e.scancode == sf::Keyboard::Scan::Escape;
 }
 
+/**
+ * If backspace was pressed in key or scan, return true, else return false
+ */
 bool backPressed(const sf::Event::KeyPressed& e) {
     return e.code == sf::Keyboard::Key::Backspace || e.scancode == sf::Keyboard::Scan::Backspace;
 }
 
+/**
+ * Return a random float in the range lo < value < hi
+ */
 float randomRange(float lo, float hi) {
     thread_local std::mt19937 gen{std::random_device{}()};
     std::uniform_real_distribution<float> dist(lo, hi);
@@ -56,12 +71,19 @@ float randomRange(float lo, float hi) {
 }
 }  // namespace
 
+/**
+ * Constructor
+ * Creates window and calls method to initialize game vars
+ */
 Game::Game()
     : window(sf::VideoMode({GameConstants::WindowWidth, GameConstants::WindowHeight}),
              GameConstants::WindowTitle) {
     initialize();
 }
 
+/**
+ * Handle gameplay loop monitoring keypresses, mouse clicks and other inputs, clearing the window, and updating/drawing the game elements
+ */
 void Game::run() {
     while (window.isOpen()) {
         float dt = frameClock_.restart().asSeconds();
@@ -77,6 +99,9 @@ void Game::run() {
     }
 }
 
+/**
+ * Sets up the fonts, inital ball/paddle position, and blocks
+ */
 void Game::initialize() {
     window.setKeyRepeatEnabled(false);
 
@@ -113,6 +138,9 @@ void Game::initialize() {
     }
 }
 
+/**
+ * Creates the brick grid for the game screen using nested for loops
+ */
 void Game::initializeBricks() {
     bricks.clear();
     bricks.reserve(GameConstants::BrickRows * GameConstants::BrickColumns);
@@ -136,6 +164,9 @@ void Game::initializeBricks() {
     }
 }
 
+/**
+ * Makes all bricks in bricks active/shown
+ */
 void Game::resetBricks() {
     for (Brick& brick : bricks) {
         brick.isActive = true;
@@ -143,6 +174,9 @@ void Game::resetBricks() {
     gameState = GameState::Playing;
 }
 
+/**
+ * resets score, lives, and ball/brick
+ */
 void Game::resetGame() {
     score = 0;
     gameManager.resetLives();
@@ -153,6 +187,9 @@ void Game::resetGame() {
     gameState = GameState::Paused;
 }
 
+/**
+ * Handles events for teh program, including key presses and the window closing
+ */
 void Game::handleEvents() {
     while (auto event = window.pollEvent()) {
         if (event->is<sf::Event::Closed>()) {
@@ -165,6 +202,9 @@ void Game::handleEvents() {
     }
 }
 
+/**
+ * Handles mouse clicks/positions in realtion to buttons
+ */
 void Game::handleMouseEvent(){
     auto mousePos = sf::Vector2f(sf::Mouse::getPosition(window));
     if(playBtn.getGlobalBounds().contains(mousePos)){
@@ -189,7 +229,9 @@ void Game::handleMouseEvent(){
     }
 }
 
-
+/**
+ * Handles shortcuts to leave/reset the game while playing
+ */
 void Game::pollKeyboardShortcuts() {
     const bool esc = keyOrScanDown(sf::Keyboard::Key::Escape, sf::Keyboard::Scan::Escape);
     const bool m = keyOrScanDown(sf::Keyboard::Key::M, sf::Keyboard::Scan::M);
@@ -216,6 +258,10 @@ void Game::pollKeyboardShortcuts() {
     prevSpaceDown_ = sp;
 }
 
+/**
+ * Handles keypresses in the main and settings menu for cycling through options and 'pressing'
+ * the buttons with teh 'enter' keys
+ */
 void Game::processKeyPressed(const sf::Event::KeyPressed& key) {
     const auto k = key.code;
 
@@ -287,6 +333,10 @@ void Game::processKeyPressed(const sf::Event::KeyPressed& key) {
     }
 }
 
+/**
+ * Sets the ball velocity for the start of the program and converts it back to a vector 2 for future 
+ * use in the program.
+ */
 void Game::applyBallLaunchVelocity() {
     const float baseSpeed = GameConstants::BallSpeedPxPerSec * ballSpeedMultiplier;
     const float speedJitter =
@@ -299,6 +349,9 @@ void Game::applyBallLaunchVelocity() {
     physicsManager.setVelocity({speed * std::cos(rad), speed * std::sin(rad)});
 }
 
+/**
+ * handles the gameplay related keypresses including moving the paddle and unpausing the game when paused. 
+ */
 void Game::handleInput(float dt) {
     if (screenState != ScreenState::Game || gameState != GameState::Playing) {
         if(gameState == GameState::Paused && (
@@ -330,6 +383,9 @@ void Game::handleInput(float dt) {
     }
 }
 
+/**
+ * Handles the ball collisions including the paddle, walls, and the bricks
+ */
 void Game::update(float dt) {
     if (screenState != ScreenState::Game || gameState != GameState::Playing) {
         return;
@@ -386,12 +442,19 @@ void Game::update(float dt) {
     }
 }
 
+/**
+ * Sets the ball to its constant start position and applies a launch velocity
+ */
 void Game::resetBall() {
     ball.setPosition({GameConstants::BallStartX, GameConstants::BallStartY});
     gameState = GameState::Paused;
     applyBallLaunchVelocity();
 }
 
+/**
+ * Renders the various elements beased on the Screen state, including the bricks, border, paddle
+ * and ball if in play mode.
+ */
 void Game::render() {
     if (screenState == ScreenState::MainMenu) {
         renderMainMenu();
@@ -419,6 +482,9 @@ void Game::render() {
     }
 }
 
+/**
+ * Renders the main menu and the menu options, with error handling if fonts didn'y load
+ */
 void Game::renderMainMenu() {
     if (!hasHudFont) {
         window.setTitle("Breakout | 1 Play | 3 Quit (no font; add assets/fonts or install Windows fonts)");
@@ -488,6 +554,9 @@ void Game::renderMainMenu() {
     window.draw(*menuLineText);
 }
 
+/**
+ * Renders the settings menu with some error handling
+ */
 void Game::renderSettingsScreen() {
     if (!hasHudFont || !menuTitleText || !menuLineText) {
         return;
@@ -533,6 +602,9 @@ void Game::renderSettingsScreen() {
     window.draw(*menuLineText);
 }
 
+/**
+ * For each brick in the brick list, if active render/draw it, else don't
+ */
 void Game::renderBricks() {
     for (const Brick& brick : bricks) {
         if (brick.isActive) {
@@ -541,6 +613,9 @@ void Game::renderBricks() {
     }
 }
 
+/**
+ * Updates and displays the current life, score etc. while playing the game
+ */
 void Game::updateHudText() {
     if (!hasHudFont || !scoreText || !livesText || !statusText) {
         return;
@@ -572,10 +647,16 @@ void Game::updateHudText() {
     }
 }
 
+/**
+ * If ball collides passed brick return true, else return false
+ */
 bool Game::ballIntersectsBrick(const Brick& brick) const {
     return ball.getGlobalBounds().findIntersection(brick.shape.getGlobalBounds()).has_value();
 }
 
+/**
+ * Handles the collisions between ball and bricks if occur, changing ball speed/position
+ */
 void Game::handleBrickCollision(float dt) {
     for (std::size_t index = 0; index < bricks.size(); ++index) {
         const Brick& brick = bricks[index];
@@ -596,6 +677,9 @@ void Game::handleBrickCollision(float dt) {
     }
 }
 
+/**
+ * Creates the border of the play screen
+ */
 void Game::drawBorders() {
     std::array leftLine = {
         sf::Vertex{sf::Vector2f(GameConstants::BorderXOffset, GameConstants::BorderYOffset)},

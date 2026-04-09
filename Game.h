@@ -19,19 +19,19 @@ private:
         MainMenu,
         Settings,
         Game
-    };
+    }; //What page the application is curently on
 
     enum class GameState {
         Playing,
         Paused,
         Won,
         GameOver
-    };
+    }; //what state the game is in while playing
 
     struct Brick {
         sf::RectangleShape shape;
         bool isActive = true;
-    };
+    }; //Struct that handles the bricks to be shown in the menu. 
 
     void initialize();
     void initializeBricks();
