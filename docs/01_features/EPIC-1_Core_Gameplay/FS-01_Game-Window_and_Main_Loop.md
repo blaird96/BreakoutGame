@@ -13,6 +13,14 @@
 | **Primary evidence** | [`main.cpp`](../../main.cpp) lines 4, 17–24, 24, 61–62 |
 | **Gaps** | No fixed timestep or delta-time abstraction; no dedicated resource init/shutdown layer; gameplay entities created inline in `main` |
 
+### 2026-04-09 Addendum
+
+- **Updated implementation status:** Mostly complete (~85%)
+- **Current evidence:** `phase1_main.cpp`, `Game.cpp` (`Game::run`, `initialize`, `handleEvents`, `render`)
+- **Complete now:** Dedicated `Game` class lifecycle, window creation/close handling, dt-based frame update, clear/draw/display sequencing.
+- **Partially complete:** Some responsibilities still centralized in `Game.cpp`; no explicit shutdown/resource service layer.
+- **Outstanding:** Further modularization into smaller subsystems and improved architecture-level documentation.
+
 ---
 
 ## Purpose and scope

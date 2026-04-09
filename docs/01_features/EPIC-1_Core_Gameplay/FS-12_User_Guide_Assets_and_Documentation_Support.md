@@ -13,6 +13,14 @@
 | **Primary evidence** | [`README.md`](../../README.md) — SFML/MinGW setup, VS Code intent, controls partially implied via FS-02 spec (not all copied to README yet) |
 | **Gaps** | No dedicated User Guide markdown/PDF; screenshot checklist not completed; troubleshooting limited; Final Report asset list not populated |
 
+### 2026-04-09 Addendum
+
+- **Updated implementation status:** Partially complete (~50%)
+- **Current evidence:** `README.md` expanded setup/controls/limitations, `docs/02_management/Phase1_Test_Checklist.md`
+- **Complete now:** Stronger build/run and controls guidance; documented manual test evidence artifact.
+- **Partially complete:** Dedicated user-guide deliverable package and evidence mapping to all FS IDs are still incomplete.
+- **Outstanding:** Create final User Guide document, capture labeled screenshots/media, and add finalized attribution/troubleshooting sections for submission readiness.
+
 ---
 
 ## Purpose and scope
