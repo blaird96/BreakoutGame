@@ -13,6 +13,14 @@
 | **Primary evidence** | [`main.cpp`](../../main.cpp) lines 9–13, 45–58 |
 | **Gaps** | No ball “waiting on paddle” launch state; wall collision uses position thresholds not generalized normals; bottom loss couples to lives in same block (see FS-06) |
 
+### 2026-04-09 Addendum
+
+- **Updated implementation status:** Partially complete (~70%)
+- **Current evidence:** `Game.cpp` (`applyBallLaunchVelocity`, `update`, `resetBall`), `GameConstants.h`
+- **Complete now:** dt-scaled motion, configurable speed constants, wall/ceiling reflection, randomized serve direction/speed, pause-on-reset launch flow.
+- **Partially complete:** Collision response remains threshold-based and tightly coupled to gameplay update flow.
+- **Outstanding:** Improve directional collision resolution robustness, reduce magic-threshold behavior, and further decouple miss/life transitions from physics update logic.
+
 ---
 
 ## Purpose and scope

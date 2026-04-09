@@ -13,6 +13,14 @@
 | **Primary evidence** | [`README.md`](../../README.md), [`.vscode/tasks.json`](../../.vscode/tasks.json), single translation unit [`main.cpp`](../../main.cpp) |
 | **Gaps** | Machine-specific absolute paths on `C:\`; no CMake/presets; no documented Git branching rules; `docs/02_management/` management docs (e.g. Task Board) not in current repository tree; team workflow not fully captured in repo |
 
+### 2026-04-09 Addendum
+
+- **Updated implementation status:** Partially complete (~70%)
+- **Current evidence:** `README.md`, `.vscode/tasks.json`, `scripts/Resolve-Toolchain.ps1`, `scripts/build-phase1.ps1`, `CMakePresets.json`
+- **Complete now:** Shared script-driven build flow, environment-variable-based toolchain configuration, clearer setup and controls documentation, partial CMake preset scaffolding.
+- **Partially complete:** Branch/review workflow and management conventions remain under-documented in-repo.
+- **Outstanding:** Add/validate `CMakeLists.txt` to match presets, finalize workflow policy docs, and keep setup documentation synchronized with real build behavior.
+
 ---
 
 ## Purpose and scope

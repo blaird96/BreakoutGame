@@ -13,6 +13,14 @@
 | **Primary evidence** | [`main.cpp`](../../main.cpp) draws border lines, paddle, and ball only (lines 26–32, 43, 59) |
 | **Gaps** | No `sf::Text` for score/lives; no win/loss overlays; no font loading; optional particle/flash feedback |
 
+### 2026-04-09 Addendum
+
+- **Updated implementation status:** Mostly complete (~88%)
+- **Current evidence:** `Game.cpp` (`updateHudText`, menu/status rendering, font loading fallback), `README.md` control and fallback notes
+- **Complete now:** Score and lives HUD, win/game-over overlays, menu and settings UI text, fallback behavior when no project font is present.
+- **Partially complete:** Enhanced visual feedback effects (brick impact flashes/particles) and formal accessibility pass are still limited.
+- **Outstanding:** Add optional feedback polish, finalize font packaging guidance, and capture evidence screenshots for documentation deliverables.
+
 ---
 
 ## Purpose and scope

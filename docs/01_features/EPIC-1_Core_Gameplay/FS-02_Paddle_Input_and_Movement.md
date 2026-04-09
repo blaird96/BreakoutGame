@@ -13,6 +13,14 @@
 | **Primary evidence** | [`main.cpp`](../../main.cpp) lines 5–7, 34–43, 43 |
 | **Gaps** | Movement is **per-frame** (0.1 px) not time-based; no key repeat policy beyond `isKeyPressed`; no alternate input (gamepad) |
 
+### 2026-04-09 Addendum
+
+- **Updated implementation status:** Mostly complete (~75%)
+- **Current evidence:** `Game.cpp` (`handleInput`), `GameConstants.h`, `GameHelpers.h`
+- **Complete now:** Arrow + WASD support, clamped horizontal bounds, dt-based paddle movement (`PaddleSpeedPxPerSec * dt`), centralized clamp helper usage.
+- **Partially complete:** Simultaneous opposite-key behavior still implicit (`if`/`else if`), no alternate input device support.
+- **Outstanding:** Formalize key-conflict behavior, add test evidence for edge-input behavior, and document final control policy.
+
 ---
 
 ## Purpose and scope

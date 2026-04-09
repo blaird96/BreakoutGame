@@ -13,6 +13,14 @@
 | **Primary evidence** | [`main.cpp`](../../main.cpp) lines 46–52 (paddle); no brick logic |
 | **Gaps** | Brick-ball tests; robust normal/penetration handling; corner cases (ball inside paddle, tunneling at high speed) |
 
+### 2026-04-09 Addendum
+
+- **Updated implementation status:** Mostly complete (~80%)
+- **Current evidence:** `Game.cpp` (`update`, `handleBrickCollision`, paddle-angle bounce code)
+- **Complete now:** Paddle collision with angle-based response, active brick collision detection, single-brick-per-frame deactivation, score trigger on brick hit.
+- **Partially complete:** Brick response uses simplified reflection and overlap checks; limited penetration/tunneling handling.
+- **Outstanding:** Improve side-aware collision normal resolution, add stronger overlap correction, and verify deterministic multi-contact behavior.
+
 ---
 
 ## Purpose and scope

@@ -13,6 +13,14 @@
 | **Primary evidence** | This specification; manual play of [`main.cpp`](../../main.cpp) build expected but not scripted |
 | **Gaps** | No unit test framework, no CI, no recorded test matrix in docs; evidence log not verified in this pass |
 
+### 2026-04-09 Addendum
+
+- **Updated implementation status:** Partially complete (~60%)
+- **Current evidence:** `tests/` harness and unit tests, `docs/02_management/Phase1_Test_Checklist.md`
+- **Complete now:** Basic automated helper/state tests and a dated manual execution checklist with pass/fail results.
+- **Partially complete:** No CI pipeline yet; test-to-feature traceability and defect workflow are still lightweight.
+- **Outstanding:** Add CI build/test automation, formalize defect tracking severity and process, and expand regression coverage for gameplay integration paths.
+
 ---
 
 ## Purpose and scope

@@ -13,6 +13,14 @@
 | **Primary evidence** | None in [`main.cpp`](../../main.cpp) |
 | **Gaps** | Entire subsystem: data structure, layout, rendering, hit response, win condition support |
 
+### 2026-04-09 Addendum
+
+- **Updated implementation status:** Partially complete (~65%)
+- **Current evidence:** `Game.h` (`Brick` struct), `Game.cpp` (`initializeBricks`, `resetBricks`, `renderBricks`)
+- **Complete now:** Brick grid initialization (5x8), rendering of active bricks, active/inactive state handling, reset of grid for new rounds.
+- **Partially complete:** Brick model is embedded in `Game` rather than a dedicated subsystem; no multi-hit brick/state variants.
+- **Outstanding:** Extract brick subsystem into reusable module, add richer brick-state extensibility, and keep grid/state APIs aligned with future level support.
+
 ---
 
 ## Purpose and scope

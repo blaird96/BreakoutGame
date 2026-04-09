@@ -13,6 +13,14 @@
 | **Primary evidence** | [`main.cpp`](../../main.cpp) lines 15, 54–56 (`lives--`, ball reset) |
 | **Gaps** | No score variable or brick-based increments; no game-over when `lives <= 0`; no win when all bricks cleared; no enum/`GameState` machine; lives not shown (FS-08) |
 
+### 2026-04-09 Addendum
+
+- **Updated implementation status:** Mostly complete (~90%)
+- **Current evidence:** `Game.cpp` (`score`, `loseLife`, win/game-over transitions, `resetGame`), `GameHelpers.h`, `src/GameManager.h`
+- **Complete now:** Score increment on brick hit, lives clamped at zero, win on no active bricks, game over at zero lives, gameplay halted in terminal states.
+- **Partially complete:** Scoring policy remains simple (fixed increment), and longer-term progression/high-score behavior is not yet in scope.
+- **Outstanding:** Define final scoring model for report consistency and add additional transition-focused verification artifacts.
+
 ---
 
 ## Purpose and scope

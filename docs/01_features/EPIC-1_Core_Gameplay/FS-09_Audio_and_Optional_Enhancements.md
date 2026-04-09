@@ -13,6 +13,14 @@
 | **Primary evidence** | [`main.cpp`](../../main.cpp) includes only `SFML/Graphics.hpp`; [`.vscode/tasks.json`](../../.vscode/tasks.json) links graphics, window, system — not audio |
 | **Gaps** | No `sfml-audio`, no buffers/music, no volume control; other stretch items (levels, pause) tracked here as optional |
 
+### 2026-04-09 Addendum
+
+- **Updated implementation status:** Early/partial (~20%)
+- **Current evidence:** No `sfml-audio` linkage or runtime audio subsystem in current code path.
+- **Complete now:** Some optional-adjacent UX pieces (menu/settings flow) exist, but FS-09 audio functionality itself remains unimplemented.
+- **No longer relevant/obsolete:** Legacy references that treat `src/main.cpp` as the only runtime path are outdated.
+- **Outstanding:** Add audio library linkage, event-based SFX/music hooks, asset and license handling, and decide whether multi-level progression belongs to this term scope.
+
 ---
 
 ## Purpose and scope
