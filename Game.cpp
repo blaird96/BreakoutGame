@@ -14,14 +14,16 @@
 namespace {
 bool tryLoadHudFont(sf::Font& font) {
     namespace fs = std::filesystem;
+    // 1) Retro pixel (add PressStart2P-Regular.ttf under assets/fonts/ — SIL OFL).
+    // 2) Windows system fonts (readable HUD). 3) Bundled decorative fonts last.
     const fs::path candidates[] = {
         "assets/fonts/PressStart2P-Regular.ttf",
+        "C:/Windows/Fonts/segoeui.ttf",
+        "C:/Windows/Fonts/calibri.ttf",
+        "C:/Windows/Fonts/arial.ttf",
         "assets/fonts/Nicholas.ttf",
         "assets/fonts/Grow Year.ttf",
         "assets/fonts/VintageCharm-Regular.otf",
-        "C:/Windows/Fonts/arial.ttf",
-        "C:/Windows/Fonts/segoeui.ttf",
-        "C:/Windows/Fonts/calibri.ttf",
     };
     for (const fs::path& path : candidates) {
         std::error_code ec;
