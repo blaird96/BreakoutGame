@@ -1,0 +1,54 @@
+{
+    "version": 5,
+    "cmakeMinimumRequired": {
+        "major": 3,
+        "minor": 23,
+        "patch": 0
+    },
+    "configurePresets": [
+        {
+            "name": "default-debug",
+            "displayName": "Breakout Debug",
+            "description": "Generic debug build. Override BREAKOUT_GPP and BREAKOUT_SFML_ROOT as needed.",
+            "generator": "MinGW Makefiles",
+            "binaryDir": "${sourceDir}/build/default-debug",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+                "CMAKE_CXX_COMPILER": "$env{BREAKOUT_GPP}",
+                "BREAKOUT_SFML_ROOT": "$env{BREAKOUT_SFML_ROOT}"
+            }
+        },
+        {
+            "name": "tests-debug",
+            "displayName": "Breakout Tests Debug",
+            "description": "Debug build with CTest-enabled unit test target.",
+            "generator": "MinGW Makefiles",
+            "binaryDir": "${sourceDir}/build/tests-debug",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+                "CMAKE_CXX_COMPILER": "$env{BREAKOUT_GPP}",
+                "BREAKOUT_SFML_ROOT": "$env{BREAKOUT_SFML_ROOT}",
+                "BUILD_TESTING": "ON"
+            }
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "default-debug",
+            "configurePreset": "default-debug"
+        },
+        {
+            "name": "tests-debug",
+            "configurePreset": "tests-debug"
+        }
+    ],
+    "testPresets": [
+        {
+            "name": "tests-debug",
+            "configurePreset": "tests-debug",
+            "output": {
+                "outputOnFailure": true
+            }
+        }
+    ]
+}

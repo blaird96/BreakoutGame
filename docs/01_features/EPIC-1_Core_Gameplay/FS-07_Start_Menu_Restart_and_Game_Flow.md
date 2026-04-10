@@ -13,6 +13,14 @@
 | **Primary evidence** | [`main.cpp`](../../main.cpp) runs a single continuous loop; no menu or restart keys |
 | **Gaps** | No title/menu screen; no pause; no “press key to restart” after win/loss; state machine not implemented |
 
+### 2026-04-09 Addendum
+
+- **Updated implementation status:** Mostly complete (~85%)
+- **Current evidence:** `Game.h` (`ScreenState`, `GameState`), `Game.cpp` (`renderMainMenu`, `renderSettingsScreen`, restart/menu shortcuts)
+- **Complete now:** Main menu flow, settings screen flow, explicit state transitions, restart from terminal states, return-to-menu shortcuts.
+- **Partially complete:** Pause is currently tied to serve/reset behavior rather than a full mid-rally pause/resume system.
+- **Outstanding:** Decide if full in-play pause is required for this epic and finalize documentation for all flow-control inputs.
+
 ---
 
 ## Purpose and scope

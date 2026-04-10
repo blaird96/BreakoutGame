@@ -1,3 +1,5 @@
+/*DON'T THINK THIS FILE/CLASS ISN'T NEEDED FOR THE PROGRAM */
+
 #include "GameManager.h"
 
 GameManager::GameManager(){

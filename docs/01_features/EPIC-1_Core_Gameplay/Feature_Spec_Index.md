@@ -56,6 +56,25 @@ Status reflects the **current repository** as of **2026-04-01**: a single-file S
 
 Individual Feature Specification documents contain detailed **Status**, requirements, attributes, and acceptance criteria aligned with this summary.
 
+## 2A. 2026-04-09 status refresh addendum
+
+The repository has materially advanced beyond the 2026-04-01 snapshot above. Current Phase I runtime is driven by `phase1_main.cpp` and `Game.cpp`, with gameplay constants in `GameConstants.h`, helper logic in `GameHelpers.h`, and helper/state unit tests under `tests/`.
+
+- **FS-01** Game window and main loop — **Mostly complete** (~85%)
+- **FS-02** Paddle input and movement — **Mostly complete** (~75%)
+- **FS-03** Ball motion and boundary collision — **Partially complete** (~70%)
+- **FS-04** Brick grid and brick state — **Partially complete** (~65%)
+- **FS-05** Collision system (paddle and bricks) — **Mostly complete** (~80%)
+- **FS-06** Score, lives, and end states — **Mostly complete** (~90%)
+- **FS-07** Start menu, restart, game flow — **Mostly complete** (~85%)
+- **FS-08** HUD, visual feedback, presentation — **Mostly complete** (~88%)
+- **FS-09** Audio and optional enhancements — **Early/partial** (~20%)
+- **FS-10** Build setup, tooling, repository workflow — **Partially complete** (~70%)
+- **FS-11** Testing and quality assurance — **Partially complete** (~60%)
+- **FS-12** User guide assets and documentation support — **Partially complete** (~50%)
+
+Remaining legacy status lines in older sections are retained for historical traceability; the 2026-04-09 values above are the current baseline for planning and tasking.
+
 ---
 
 # 3. How to Use This Index

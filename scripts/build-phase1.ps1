@@ -1,10 +1,26 @@
-# Build Phase I (root main.exe). Requires the same WinLibs + SFML paths as .vscode/tasks.json.
+# Build Phase I (root main.exe).
+# Toolchain discovery is centralized so teammates can use local installs without editing this script.
 # Plain `g++ *.cpp` will fail: SFML headers need -I and the linker needs -L plus -lsfml-*.
 $ErrorActionPreference = "Stop"
 $Root = Split-Path -Parent $PSScriptRoot
-$Gpp = "C:\winlibs-x86_64-posix-seh-gcc-14.2.0-mingw-w64ucrt-12.0.0-r2\mingw64\bin\g++.exe"
-$Sfml = "C:\SFML-3.0.2"
+$Resolver = Join-Path $PSScriptRoot "Resolve-Toolchain.ps1"
+. $Resolver
+
+$Toolchain = Resolve-BreakoutToolchain
+$Gpp = $Toolchain.Gpp
+$Sfml = $Toolchain.SfmlRoot
 $Out = Join-Path $Root "main.exe"
+
+if (-not $Gpp) {
+    throw "Could not find g++.exe. Set BREAKOUT_GPP or put g++.exe on PATH."
+}
+
+if (-not $Sfml) {
+    throw "Could not find an SFML install. Set BREAKOUT_SFML_ROOT to a folder with include/, lib/, and bin/."
+}
+
+Write-Host "Using compiler: $Gpp"
+Write-Host "Using SFML root: $Sfml"
 
 & $Gpp -std=c++20 -fdiagnostics-color=always -g `
     "-I$Sfml\include" `
