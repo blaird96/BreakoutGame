@@ -22,7 +22,8 @@ if (-not $Sfml) {
 Write-Host "Using compiler: $Gpp"
 Write-Host "Using SFML root: $Sfml"
 
-& $Gpp -std=c++20 -fdiagnostics-color=always -g `
+# Avoid -fdiagnostics-color=always here: some GCC builds return non-zero when stdout is not a TTY.
+& $Gpp -std=c++20 -g `
     "-I$Sfml\include" `
     (Join-Path $Root "phase1_main.cpp") `
     (Join-Path $Root "Game.cpp") `
@@ -30,5 +31,140 @@ Write-Host "Using SFML root: $Sfml"
     "-L$Sfml\lib" `
     -lsfml-graphics -lsfml-window -lsfml-system `
     -o $Out
+
+if (-not (Test-Path -LiteralPath $Out)) {
+    $code = $LASTEXITCODE
+    throw "Build failed: main.exe was not produced (g++ exit code $code)."
+}
+if ($LASTEXITCODE -ne 0) {
+    Write-Warning "g++ reported exit code $LASTEXITCODE but main.exe exists; continuing."
+}
+
+# Copy MinGW/SFML dependency DLLs next to main.exe (recursive via objdump). Static name lists miss installs
+# where SFML lives elsewhere or transitive deps differ.
+function Test-SkipPeBundleDll {
+    param([string]$Name)
+    $n = $Name.ToLowerInvariant()
+    if ($n.StartsWith("api-ms-win-")) { return $true }
+    if ($n.StartsWith("ext-ms-")) { return $true }
+    return $false
+}
+
+function Test-IsMingwRuntimeDllName {
+    param([string]$Name)
+    $n = $Name.ToLowerInvariant()
+    if ($n.StartsWith("lib")) { return $true }
+    if ($n -match "sfml") { return $true }
+    return $false
+}
+
+function Get-PeDllImportNames {
+    param(
+        [Parameter(Mandatory)][string]$FilePath,
+        [Parameter(Mandatory)][string]$ObjdumpExe
+    )
+    if (-not (Test-Path -LiteralPath $FilePath)) {
+        return @()
+    }
+    $out = & $ObjdumpExe -p $FilePath 2>$null
+    if (-not $out) {
+        return @()
+    }
+    $names = [System.Collections.Generic.List[string]]::new()
+    foreach ($line in $out) {
+        if ($line -match "DLL Name:\s*(\S+)") {
+            $names.Add($Matches[1]) | Out-Null
+        }
+    }
+    return $names
+}
+
+function Find-DllInSearchRoots {
+    param(
+        [Parameter(Mandatory)][string]$DllLeafName,
+        [string[]]$SearchDirs
+    )
+    foreach ($dir in $SearchDirs) {
+        if ([string]::IsNullOrWhiteSpace($dir)) { continue }
+        $p = Join-Path $dir $DllLeafName
+        if (Test-Path -LiteralPath $p) {
+            return $p
+        }
+    }
+    return $null
+}
+
+$CompilerBin = $Toolchain.CompilerBin
+$SfmlBin = $Toolchain.SfmlBin
+$BinSearch = @(
+    $CompilerBin
+    $SfmlBin
+    $(if ($env:MSYS2_ROOT) { Join-Path $env:MSYS2_ROOT "ucrt64\bin" })
+    $(if ($env:BREAKOUT_RUNTIME_BIN) { $env:BREAKOUT_RUNTIME_BIN -split ";" })
+) | Where-Object { -not [string]::IsNullOrWhiteSpace($_) } | Select-Object -Unique
+
+$Objdump = Join-Path (Split-Path -Parent $Gpp) "objdump.exe"
+if (-not (Test-Path -LiteralPath $Objdump)) {
+    Write-Warning "objdump.exe not found next to g++.exe; cannot bundle runtime DLLs automatically."
+} else {
+    $queue = New-Object System.Collections.Generic.Queue[string]
+    $seenLeaf = @{}
+
+    foreach ($dll in (Get-PeDllImportNames -FilePath $Out -ObjdumpExe $Objdump)) {
+        if (Test-SkipPeBundleDll $dll) { continue }
+        if (-not (Test-IsMingwRuntimeDllName $dll)) { continue }
+        $src = Find-DllInSearchRoots -DllLeafName $dll -SearchDirs $BinSearch
+        if ($src) {
+            $queue.Enqueue($src) | Out-Null
+        }
+    }
+
+    $copied = 0
+    while ($queue.Count -gt 0) {
+        $src = $queue.Dequeue()
+        $leaf = Split-Path -Leaf $src
+        if ($seenLeaf.ContainsKey($leaf)) { continue }
+        $seenLeaf[$leaf] = $true
+        Copy-Item -LiteralPath $src -Destination (Join-Path $Root $leaf) -Force
+        ++$copied
+
+        foreach ($dep in (Get-PeDllImportNames -FilePath $src -ObjdumpExe $Objdump)) {
+            if (Test-SkipPeBundleDll $dep) { continue }
+            if (-not (Test-IsMingwRuntimeDllName $dep)) { continue }
+            $depSrc = Find-DllInSearchRoots -DllLeafName $dep -SearchDirs $BinSearch
+            if ($depSrc) {
+                $queue.Enqueue($depSrc) | Out-Null
+            }
+        }
+    }
+
+    $stillMissing = [System.Collections.Generic.List[string]]::new()
+    foreach ($dll in (Get-PeDllImportNames -FilePath $Out -ObjdumpExe $Objdump)) {
+        if (Test-SkipPeBundleDll $dll) { continue }
+        if (-not (Test-IsMingwRuntimeDllName $dll)) { continue }
+        if (-not (Test-Path -LiteralPath (Join-Path $Root $dll))) {
+            $stillMissing.Add($dll) | Out-Null
+        }
+    }
+
+    if ($stillMissing.Count -gt 0) {
+        $uniq = $stillMissing | Select-Object -Unique
+        $msg = @"
+The build linked main.exe, but these MinGW/SFML runtime DLLs were not found under your compiler or SFML bin folders:
+  $($uniq -join "`n  ")
+
+Typical fix on MSYS2 (open 'UCRT64' terminal, not MSYS):
+  pacman -Syu
+  pacman -S mingw-w64-ucrt-x86_64-sfml
+
+Or point BREAKOUT_SFML_ROOT (and if needed BREAKOUT_RUNTIME_BIN) at an install whose bin\ folder contains the DLLs above.
+"@
+        throw $msg
+    }
+
+    if ($copied -gt 0) {
+        Write-Host "Copied $copied runtime DLL(s) next to main.exe (objdump dependency closure)."
+    }
+}
 
 Write-Host "Built: $Out"

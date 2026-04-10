@@ -26,9 +26,38 @@ $runtimeEntries = $runtimeEntries |
     Where-Object { -not [string]::IsNullOrWhiteSpace($_) } |
     Select-Object -Unique
 
-if ($runtimeEntries.Count -gt 0) {
-    $env:PATH = (($runtimeEntries + $env:PATH) -join ';')
+# Exe directory first: build-phase1.ps1 copies DLLs next to main.exe; then toolchain bins.
+$prefixDirs = @($Root) + $runtimeEntries |
+    Where-Object { -not [string]::IsNullOrWhiteSpace($_) } |
+    Select-Object -Unique
+if ($prefixDirs.Count -gt 0) {
+    $env:PATH = ($prefixDirs -join ';') + ';' + $env:PATH
 }
 
 Set-Location $Root
+
+$preflight = @("libstdc++-6.dll", "libsfml-window-3.dll")
+foreach ($dll in $preflight) {
+    $ok = $false
+    if (Test-Path -LiteralPath (Join-Path $Root $dll)) {
+        $ok = $true
+    }
+    if (-not $ok) {
+        foreach ($dir in $runtimeEntries) {
+            if (Test-Path -LiteralPath (Join-Path $dir $dll)) {
+                $ok = $true
+                break
+            }
+        }
+    }
+    if (-not $ok) {
+        Write-Warning "Could not find $dll next to main.exe or in toolchain bin folders. Run .\scripts\build-phase1.ps1 (install SFML in MSYS2 UCRT64 if the build reports missing DLLs)."
+    }
+}
+
+Write-Host "Launching main.exe (working directory: $Root) ..."
 & $Exe
+$code = $LASTEXITCODE
+if ($code -ne 0) {
+    Write-Host "main.exe exited with code $code. If it failed instantly, missing MinGW/SFML DLLs are the usual cause; rebuild with .\scripts\build-phase1.ps1 to copy DLLs beside the exe."
+}

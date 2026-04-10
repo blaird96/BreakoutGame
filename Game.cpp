@@ -16,6 +16,9 @@ bool tryLoadHudFont(sf::Font& font) {
     namespace fs = std::filesystem;
     const fs::path candidates[] = {
         "assets/fonts/PressStart2P-Regular.ttf",
+        "assets/fonts/Nicholas.ttf",
+        "assets/fonts/Grow Year.ttf",
+        "assets/fonts/VintageCharm-Regular.otf",
         "C:/Windows/Fonts/arial.ttf",
         "C:/Windows/Fonts/segoeui.ttf",
         "C:/Windows/Fonts/calibri.ttf",
@@ -270,6 +273,9 @@ void Game::processKeyPressed(const sf::Event::KeyPressed& key) {
             if (k == sf::Keyboard::Key::Num1) {
                 screenState = ScreenState::Game;
                 resetGame();
+            } else if (k == sf::Keyboard::Key::Num2) {
+                screenState = ScreenState::Settings;
+                settingsSelection = 0;
             } else if (k == sf::Keyboard::Key::Num3) {
                 window.close();
             }
@@ -487,7 +493,21 @@ void Game::render() {
  */
 void Game::renderMainMenu() {
     if (!hasHudFont) {
-        window.setTitle("Breakout | 1 Play | 3 Quit (no font; add assets/fonts or install Windows fonts)");
+        window.setTitle(
+            "Breakout | Keys: 1 Play  2 Settings  3 Quit  |  Or click colored bars (no font loaded)");
+        const float cx = static_cast<float>(window.getSize().x) / 2.f;
+        auto layout = [&](sf::RectangleShape& btn, float y, const sf::Color& fill) {
+            btn.setSize({260.f, 48.f});
+            btn.setOrigin({130.f, 24.f});
+            btn.setPosition({cx, y});
+            btn.setFillColor(fill);
+            btn.setOutlineThickness(2.f);
+            btn.setOutlineColor(sf::Color::White);
+            window.draw(btn);
+        };
+        layout(playBtn, 320.f, sf::Color(30, 100, 40));
+        layout(settingsBtn, 400.f, sf::Color(40, 60, 120));
+        layout(quitBtn, 480.f, sf::Color(120, 30, 30));
         return;
     }
 
@@ -558,7 +578,11 @@ void Game::renderMainMenu() {
  * Renders the settings menu with some error handling
  */
 void Game::renderSettingsScreen() {
-    if (!hasHudFont || !menuTitleText || !menuLineText) {
+    if (!hasHudFont) {
+        window.setTitle("SETTINGS (no font) — Esc: back to menu");
+        return;
+    }
+    if (!menuTitleText || !menuLineText) {
         return;
     }
 
