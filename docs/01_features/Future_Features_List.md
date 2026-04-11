@@ -65,7 +65,7 @@ Would require changing the structure of the blocks object and andditional destrc
 
 ### Who is interested in Implementing?
 
----
+Kenise
 
 ## 04 - Storing high scores in Database to be displayed:
 
