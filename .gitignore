@@ -4,6 +4,9 @@
 *.xlsx
 *.txt
 
+## Ignore Generated Executables:
+*.exe
+
 ## Ignore unit documentation markdown files
 Unit*.md
 
