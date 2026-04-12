@@ -2,6 +2,6 @@
     // Keep the workspace terminal generic. Teammates should use PATH or local env vars instead of
     // committing machine-specific toolchain folders into shared settings.
     "terminal.integrated.env.windows": {
-        "PATH": "${env:BREAKOUT_RUNTIME_BIN};${env:PATH}"
+        "PATH": "${workspaceFolder}/runtime;${env:BREAKOUT_RUNTIME_BIN};${env:PATH}"
     }
 }

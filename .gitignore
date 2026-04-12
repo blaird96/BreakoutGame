@@ -15,21 +15,5 @@ build/
 CMakeUserPresets.json
 Testing/
 
-## MinGW + SFML runtime DLLs copied next to main.exe by scripts/build-phase1.ps1
-/libsfml-*.dll
-/libstdc++-6.dll
-/libgcc_s_seh-1.dll
-/libwinpthread-1.dll
-/libfreetype-6.dll
-/libharfbuzz-0.dll
-/libpng16-16.dll
-/zlib1.dll
-/libbz2-1.dll
-/libbrotlidec.dll
-/libbrotlicommon.dll
-/libgraphite2.dll
-/libglib-2.0-0.dll
-/libintl-8.dll
-/libiconv-2.dll
-/libpcre2-8-0.dll
-/libffi-8.dll
+## MinGW + SFML runtime DLLs copied to runtime/ by scripts/build-phase1.ps1
+/runtime/*.dll

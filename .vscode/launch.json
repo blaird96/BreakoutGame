@@ -16,7 +16,7 @@
                     // BREAKOUT_RUNTIME_BIN is an optional local override for DLL locations.
                     // Example: C:\SFML-3.0.2\bin or C:\msys64\ucrt64\bin
                     "name": "PATH",
-                    "value": "${env:BREAKOUT_RUNTIME_BIN};${env:PATH}"
+                    "value": "${workspaceFolder}/runtime;${env:BREAKOUT_RUNTIME_BIN};${env:PATH}"
                 }
             ],
             "externalConsole": false,

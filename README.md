@@ -115,13 +115,15 @@ If your compiler or SFML install is not in the default locations, set `BREAKOUT_
 1. Open this folder in VS Code.
 2. **Build:** `Terminal` → `Run Build Task` (default build compiles `phase1_main.cpp`, `Game.cpp`, and `src/GameManager.cpp` to `main.exe`).
 3. **Run / debug:** `Run` → `Start Debugging` (or F5), configuration **Breakout: Debug (WinLibs + SFML)**.  
-   This builds first, then launches `main.exe` using the configured runtime path entries so DLLs resolve.
+   This builds first, then launches `main.exe` with `runtime\` (and optional `BREAKOUT_RUNTIME_BIN`) on `PATH` so bundled DLLs resolve.
 
-The integrated terminal is also configured (workspace settings) so after a successful build you can run:
+The integrated terminal prepends `runtime\` to `PATH` (workspace settings) so after a successful build you can run:
 
 ```powershell
 .\main.exe
 ```
+
+If you run the game from a shell that does not include `runtime\` on `PATH`, use `.\scripts\run-game.ps1` or prepend it yourself, e.g. `$env:PATH = "$PWD\runtime;$env:PATH"` before `.\main.exe`.
 
 ### Script (outside VS Code)
 
@@ -141,13 +143,15 @@ From the repo root, you can use:
 .\scripts\build-phase1.ps1
 ```
 
+If you previously built with DLLs beside `main.exe`, delete those leftover `*.dll` files at the repo root so you are not confused by duplicates; new copies go only into `runtime\`.
+
 Example MSYS2 UCRT64 one-liner:
 
 ```powershell
 C:\msys64\ucrt64\bin\g++.exe -std=c++20 -fdiagnostics-color=always -g -IC:\msys64\ucrt64\include .\phase1_main.cpp .\Game.cpp .\src\GameManager.cpp -LC:\msys64\ucrt64\lib -lsfml-graphics -lsfml-window -lsfml-system -o .\main.exe
 ```
 
-If you run `main.exe` by double-clicking, ensure the correct GCC runtime folder and SFML `bin` folder are on your `PATH`, or use the script / VS Code launch configuration above.
+Bundled MinGW/SFML DLLs live under **`runtime\`** after `build-phase1.ps1`. Windows does not load them from that subfolder automatically: double-clicking **`main.exe` alone will fail** unless `runtime\` is on `PATH` (the run script, VS Code debug/terminal, or a shortcut that sets `PATH`). You can also rely on your compiler and SFML `bin` folders on `PATH` if you are not using the copied DLLs.
 
 ## Automated Tests
 

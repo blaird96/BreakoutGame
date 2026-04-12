@@ -3,6 +3,7 @@
 # Plain `g++ *.cpp` will fail: SFML headers need -I and the linker needs -L plus -lsfml-*.
 $ErrorActionPreference = "Stop"
 $Root = Split-Path -Parent $PSScriptRoot
+$RuntimeDir = Join-Path $Root "runtime"
 $Resolver = Join-Path $PSScriptRoot "Resolve-Toolchain.ps1"
 . $Resolver
 
@@ -40,8 +41,8 @@ if ($LASTEXITCODE -ne 0) {
     Write-Warning "g++ reported exit code $LASTEXITCODE but main.exe exists; continuing."
 }
 
-# Copy MinGW/SFML dependency DLLs next to main.exe (recursive via objdump). Static name lists miss installs
-# where SFML lives elsewhere or transitive deps differ.
+# Copy MinGW/SFML dependency DLLs into runtime\ (recursive via objdump). Static name lists miss installs
+# where SFML lives elsewhere or transitive deps differ. Loaders resolve them via PATH (run-game.ps1 / IDE).
 function Test-SkipPeBundleDll {
     param([string]$Name)
     $n = $Name.ToLowerInvariant()
@@ -107,6 +108,7 @@ $Objdump = Join-Path (Split-Path -Parent $Gpp) "objdump.exe"
 if (-not (Test-Path -LiteralPath $Objdump)) {
     Write-Warning "objdump.exe not found next to g++.exe; cannot bundle runtime DLLs automatically."
 } else {
+    New-Item -ItemType Directory -Path $RuntimeDir -Force | Out-Null
     $queue = New-Object System.Collections.Generic.Queue[string]
     $seenLeaf = @{}
 
@@ -125,7 +127,7 @@ if (-not (Test-Path -LiteralPath $Objdump)) {
         $leaf = Split-Path -Leaf $src
         if ($seenLeaf.ContainsKey($leaf)) { continue }
         $seenLeaf[$leaf] = $true
-        Copy-Item -LiteralPath $src -Destination (Join-Path $Root $leaf) -Force
+        Copy-Item -LiteralPath $src -Destination (Join-Path $RuntimeDir $leaf) -Force
         ++$copied
 
         foreach ($dep in (Get-PeDllImportNames -FilePath $src -ObjdumpExe $Objdump)) {
@@ -142,7 +144,7 @@ if (-not (Test-Path -LiteralPath $Objdump)) {
     foreach ($dll in (Get-PeDllImportNames -FilePath $Out -ObjdumpExe $Objdump)) {
         if (Test-SkipPeBundleDll $dll) { continue }
         if (-not (Test-IsMingwRuntimeDllName $dll)) { continue }
-        if (-not (Test-Path -LiteralPath (Join-Path $Root $dll))) {
+        if (-not (Test-Path -LiteralPath (Join-Path $RuntimeDir $dll))) {
             $stillMissing.Add($dll) | Out-Null
         }
     }
@@ -163,7 +165,7 @@ Or point BREAKOUT_SFML_ROOT (and if needed BREAKOUT_RUNTIME_BIN) at an install w
     }
 
     if ($copied -gt 0) {
-        Write-Host "Copied $copied runtime DLL(s) next to main.exe (objdump dependency closure)."
+        Write-Host "Copied $copied runtime DLL(s) to runtime\ (objdump dependency closure)."
     }
 }
 

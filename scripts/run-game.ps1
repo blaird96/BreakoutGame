@@ -2,6 +2,7 @@
 # This keeps the repo portable while still supporting local overrides through environment variables.
 $ErrorActionPreference = "Stop"
 $Root = Split-Path -Parent $PSScriptRoot
+$RuntimeDir = Join-Path $Root "runtime"
 $Resolver = Join-Path $PSScriptRoot "Resolve-Toolchain.ps1"
 . $Resolver
 
@@ -26,8 +27,8 @@ $runtimeEntries = $runtimeEntries |
     Where-Object { -not [string]::IsNullOrWhiteSpace($_) } |
     Select-Object -Unique
 
-# Exe directory first: build-phase1.ps1 copies DLLs next to main.exe; then toolchain bins.
-$prefixDirs = @($Root) + $runtimeEntries |
+# Bundled DLLs from build-phase1.ps1 live in runtime\; keep repo root as fallback for older layouts.
+$prefixDirs = @($RuntimeDir, $Root) + $runtimeEntries |
     Where-Object { -not [string]::IsNullOrWhiteSpace($_) } |
     Select-Object -Unique
 if ($prefixDirs.Count -gt 0) {
@@ -39,7 +40,10 @@ Set-Location $Root
 $preflight = @("libstdc++-6.dll", "libsfml-window-3.dll")
 foreach ($dll in $preflight) {
     $ok = $false
-    if (Test-Path -LiteralPath (Join-Path $Root $dll)) {
+    if (Test-Path -LiteralPath (Join-Path $RuntimeDir $dll)) {
+        $ok = $true
+    }
+    if (-not $ok -and (Test-Path -LiteralPath (Join-Path $Root $dll))) {
         $ok = $true
     }
     if (-not $ok) {
@@ -51,7 +55,7 @@ foreach ($dll in $preflight) {
         }
     }
     if (-not $ok) {
-        Write-Warning "Could not find $dll next to main.exe or in toolchain bin folders. Run .\scripts\build-phase1.ps1 (install SFML in MSYS2 UCRT64 if the build reports missing DLLs)."
+        Write-Warning "Could not find $dll under runtime\, next to main.exe, or in toolchain bin folders. Run .\scripts\build-phase1.ps1 (install SFML in MSYS2 UCRT64 if the build reports missing DLLs)."
     }
 }
 
@@ -59,5 +63,5 @@ Write-Host "Launching main.exe (working directory: $Root) ..."
 & $Exe
 $code = $LASTEXITCODE
 if ($code -ne 0) {
-    Write-Host "main.exe exited with code $code. If it failed instantly, missing MinGW/SFML DLLs are the usual cause; rebuild with .\scripts\build-phase1.ps1 to copy DLLs beside the exe."
+    Write-Host "main.exe exited with code $code. If it failed instantly, missing MinGW/SFML DLLs are the usual cause; rebuild with .\scripts\build-phase1.ps1 to populate runtime\."
 }
