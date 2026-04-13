@@ -40,4 +40,6 @@ constexpr float BrickTopOffset = 80.f;
 constexpr float MinSpeedMultiplier = 0.35f;
 constexpr float MaxSpeedMultiplier = 4.0f;
 constexpr float SpeedMultiplierStep = 0.1f;
+
+constexpr float volumeStep = 5.f; 
 }  // namespace GameConstants

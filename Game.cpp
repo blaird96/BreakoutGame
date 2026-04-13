@@ -91,15 +91,20 @@ Game::Game()
 
 
 void Game::loadAndPlayMusic( ) {
-    // sf::Music bkgMusic;
-    if(!Game::bkgMusic.openFromFile("assets/audio/mondamusic-retro-arcade-game-music-512837.wav")){
+    if(!Game::bkgMusic.openFromFile(Game::musicFPath)){
         return;
     }
     std::cout << "Music Loaded" << std::endl;
-    bkgMusic.setVolume(80.f);
+    bkgMusic.setVolume(Game::musicVolume);
     bkgMusic.setLooping(true);
     bkgMusic.play();
 }
+
+void Game::setMusicVolume(){
+    bkgMusic.setVolume(Game::musicVolume);
+}
+
+float Game::getMusicVolume(){ return Game::musicVolume; }
 
 /**
  * Handle gameplay loop monitoring keypresses, mouse clicks and other inputs, clearing the window, and updating/drawing the game elements
@@ -324,9 +329,9 @@ void Game::processKeyPressed(const sf::Event::KeyPressed& key) {
             return;
         }
         if (k == sf::Keyboard::Key::Up) {
-            settingsSelection = (settingsSelection + 2) % 3;
+            settingsSelection = (settingsSelection + 3) % 4;
         } else if (k == sf::Keyboard::Key::Down) {
-            settingsSelection = (settingsSelection + 1) % 3;
+            settingsSelection = (settingsSelection + 1) % 4;
         } else if (k == sf::Keyboard::Key::Left) {
             if (settingsSelection == 0) {
                 paddleSpeedMultiplier = std::clamp(
@@ -338,6 +343,13 @@ void Game::processKeyPressed(const sf::Event::KeyPressed& key) {
                     ballSpeedMultiplier - GameConstants::SpeedMultiplierStep,
                     GameConstants::MinSpeedMultiplier,
                     GameConstants::MaxSpeedMultiplier);
+            } else if (settingsSelection == 2){
+                musicVolume = std::clamp(
+                    musicVolume - GameConstants::volumeStep,
+                    0.f, 
+                    100.f
+                );
+                setMusicVolume();
             }
         } else if (k == sf::Keyboard::Key::Right) {
             if (settingsSelection == 0) {
@@ -350,6 +362,13 @@ void Game::processKeyPressed(const sf::Event::KeyPressed& key) {
                     ballSpeedMultiplier + GameConstants::SpeedMultiplierStep,
                     GameConstants::MinSpeedMultiplier,
                     GameConstants::MaxSpeedMultiplier);
+            } else if (settingsSelection == 2){
+                musicVolume = std::clamp(
+                    musicVolume + GameConstants::volumeStep,
+                    0.f, 
+                    100.f
+                );
+                setMusicVolume();
             }
         } else if (enterPressed(key) && settingsSelection == 2) {
             screenState = ScreenState::MainMenu;
@@ -623,10 +642,12 @@ void Game::renderSettingsScreen() {
         "Paddle speed: " + std::to_string(pct(paddleSpeedMultiplier)) + "%  (Left/Right)";
     std::string line1 =
         "Ball speed: " + std::to_string(pct(ballSpeedMultiplier)) + "%  (Left/Right)";
-    const char* line2 = "Back to menu";
+    std::string line2 = 
+        "Music Volume: " + (static_cast<int>(musicVolume) != 0 ? (std::to_string(static_cast<int>(musicVolume)) + "% ") : "MUTE") + " (Left/Right)";
+    const char* line3 = "Back to menu";
 
-    const std::string lines[3] = {line0, line1, line2};
-    for (int i = 0; i < 3; ++i) {
+    const std::string lines[4] = {line0, line1, line2, line3};
+    for (int i = 0; i < 4; ++i) {
         menuLineText->setString(lines[i]);
         menuLineText->setFillColor(i == settingsSelection ? sf::Color::Yellow : sf::Color::White);
         const sf::FloatRect b = menuLineText->getLocalBounds();

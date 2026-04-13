@@ -55,6 +55,8 @@ private:
     void handleBrickCollision(float dt);
     void drawBorders();
     void loadAndPlayMusic();
+    void setMusicVolume();
+    float getMusicVolume();
 
     sf::Clock frameClock_;
     sf::RenderWindow window;
@@ -82,6 +84,8 @@ private:
     std::optional<std::size_t> collidingBrickIndex;
     PhysicsManager physicsManager;
     GameManager gameManager;
+    std::string musicFPath = "assets/audio/mondamusic-retro-arcade-game-music-512837.wav";
+    float musicVolume = 50.f;
 
     bool prevEscDown_ = false;
     bool prevMDown_ = false;
