@@ -2,16 +2,15 @@
     "version": "2.0.0",
     "tasks": [
         {
-            // Call the shared build script so toolchain detection lives in one place for the team.
-            // That avoids committing one teammate's exact compiler and SFML paths here.
+            // Shared label for all platforms — macOS/Linux use build-phase1.sh, Windows uses PowerShell.
             "type": "shell",
-            "label": "Build Breakout (WinLibs + SFML)",
+            "label": "Build Breakout (Phase I)",
             "command": "powershell.exe",
             "args": [
                 "-ExecutionPolicy",
                 "Bypass",
                 "-File",
-                "${workspaceFolder}\\scripts\\build-phase1.ps1"
+                "${workspaceFolder}/scripts/build-phase1.ps1"
             ],
             "options": {
                 "cwd": "${workspaceFolder}"
@@ -26,6 +25,27 @@
             "presentation": {
                 "reveal": "silent",
                 "panel": "shared"
+            },
+            "windows": {
+                "command": "powershell.exe",
+                "args": [
+                    "-ExecutionPolicy",
+                    "Bypass",
+                    "-File",
+                    "${workspaceFolder}/scripts/build-phase1.ps1"
+                ]
+            },
+            "osx": {
+                "command": "bash",
+                "args": [
+                    "${workspaceFolder}/scripts/build-phase1.sh"
+                ]
+            },
+            "linux": {
+                "command": "bash",
+                "args": [
+                    "${workspaceFolder}/scripts/build-phase1.sh"
+                ]
             }
         }
     ]

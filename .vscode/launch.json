@@ -2,34 +2,63 @@
     "version": "0.2.0",
     "configurations": [
         {
-            // Keep the debugger config generic. Build detection happens in the shared script, and
-            // teammates can either keep gdb.exe on PATH or set BREAKOUT_GDB locally if they need a custom path.
-            "name": "Breakout: Debug (WinLibs + SFML)",
+            // Debugger settings live per-OS so GDB pretty-printing is not sent to LLDB.
+            "name": "Breakout: Debug (Phase I)",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/main.exe",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
-            "environment": [
-                {
-                    // BREAKOUT_RUNTIME_BIN is an optional local override for DLL locations.
-                    // Example: C:\SFML-3.0.2\bin or C:\msys64\ucrt64\bin
-                    "name": "PATH",
-                    "value": "${workspaceFolder}/runtime;${env:BREAKOUT_RUNTIME_BIN};${env:PATH}"
-                }
-            ],
             "externalConsole": false,
-            "MIMode": "gdb",
-            "miDebuggerPath": "gdb.exe",
-            "setupCommands": [
-                {
-                    "description": "Enable pretty-printing for gdb",
-                    "text": "-enable-pretty-printing",
-                    "ignoreFailures": true
-                }
-            ],
-            "preLaunchTask": "Build Breakout (WinLibs + SFML)"
+            "program": "${workspaceFolder}/main.exe",
+            "preLaunchTask": "Build Breakout (Phase I)",
+            "windows": {
+                "program": "${workspaceFolder}/main.exe",
+                "environment": [
+                    {
+                        "name": "PATH",
+                        "value": "${workspaceFolder}/runtime;${env:BREAKOUT_RUNTIME_BIN};${env:PATH}"
+                    }
+                ],
+                "MIMode": "gdb",
+                "miDebuggerPath": "gdb.exe",
+                "setupCommands": [
+                    {
+                        "description": "Enable pretty-printing for gdb",
+                        "text": "-enable-pretty-printing",
+                        "ignoreFailures": true
+                    }
+                ]
+            },
+            "osx": {
+                "program": "${workspaceFolder}/main",
+                "environment": [
+                    {
+                        "name": "PATH",
+                        "value": "${env:PATH}"
+                    }
+                ],
+                "MIMode": "lldb",
+                "setupCommands": []
+            },
+            "linux": {
+                "program": "${workspaceFolder}/main",
+                "environment": [
+                    {
+                        "name": "PATH",
+                        "value": "${env:PATH}"
+                    }
+                ],
+                "MIMode": "gdb",
+                "miDebuggerPath": "gdb",
+                "setupCommands": [
+                    {
+                        "description": "Enable pretty-printing for gdb",
+                        "text": "-enable-pretty-printing",
+                        "ignoreFailures": true
+                    }
+                ]
+            }
         }
     ]
 }
