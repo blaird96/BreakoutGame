@@ -73,6 +73,7 @@ private:
     sf::RectangleShape playBtn;
     sf::RectangleShape settingsBtn;
     sf::RectangleShape quitBtn;
+    sf::RectangleShape settingsRtnBtn;
     ScreenState screenState = ScreenState::MainMenu;
     int mainMenuSelection = 0;
     int settingsSelection = 0;

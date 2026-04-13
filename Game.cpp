@@ -94,16 +94,21 @@ void Game::loadAndPlayMusic( ) {
     if(!Game::bkgMusic.openFromFile(Game::musicFPath)){
         return;
     }
-    std::cout << "Music Loaded" << std::endl;
     bkgMusic.setVolume(Game::musicVolume);
     bkgMusic.setLooping(true);
     bkgMusic.play();
 }
 
+/**
+ * Actually sets the volume of the music, called after changed in settings menu
+ */
 void Game::setMusicVolume(){
     bkgMusic.setVolume(Game::musicVolume);
 }
 
+/**
+ * Accessor of the music volume member 
+ */
 float Game::getMusicVolume(){ return Game::musicVolume; }
 
 /**
@@ -234,25 +239,35 @@ void Game::handleEvents() {
  */
 void Game::handleMouseEvent(){
     auto mousePos = sf::Vector2f(sf::Mouse::getPosition(window));
-    if(playBtn.getGlobalBounds().contains(mousePos)){
-        if(sf::Mouse::isButtonPressed(sf::Mouse::Button::Left)){
-            screenState = ScreenState::Game;
-            resetGame();
+    if(screenState == ScreenState::MainMenu){
+        if(playBtn.getGlobalBounds().contains(mousePos)){
+            if(sf::Mouse::isButtonPressed(sf::Mouse::Button::Left)){
+                screenState = ScreenState::Game;
+                resetGame();
+            }
+            mainMenuSelection = 0;
         }
-        mainMenuSelection = 0;
+        if(settingsBtn.getGlobalBounds().contains(mousePos)){
+            if(sf::Mouse::isButtonPressed(sf::Mouse::Button::Left)){
+                screenState = ScreenState::Settings;
+                settingsSelection = 0;
+            }
+            mainMenuSelection = 1;
+        }
+        if(quitBtn.getGlobalBounds().contains(mousePos)){
+            if(sf::Mouse::isButtonPressed(sf::Mouse::Button::Left)){
+                window.close();
+            }
+            mainMenuSelection = 2;
+        }
     }
-    if(settingsBtn.getGlobalBounds().contains(mousePos)){
-        if(sf::Mouse::isButtonPressed(sf::Mouse::Button::Left)){
-            screenState = ScreenState::Settings;
-            settingsSelection = 0;
+    else if(screenState == ScreenState::Settings){
+        if(settingsRtnBtn.getGlobalBounds().contains(mousePos)){
+            if(sf::Mouse::isButtonPressed(sf::Mouse::Button::Left)){
+                screenState = ScreenState::MainMenu;
+            }
+            settingsSelection = 3;
         }
-        mainMenuSelection = 1;
-    }
-    if(quitBtn.getGlobalBounds().contains(mousePos)){
-        if(sf::Mouse::isButtonPressed(sf::Mouse::Button::Left)){
-            window.close();
-        }
-        mainMenuSelection = 2;
     }
 }
 
@@ -287,7 +302,7 @@ void Game::pollKeyboardShortcuts() {
 
 /**
  * Handles keypresses in the main and settings menu for cycling through options and 'pressing'
- * the buttons with teh 'enter' keys
+ * the buttons with the'enter' keys
  */
 void Game::processKeyPressed(const sf::Event::KeyPressed& key) {
     const auto k = key.code;
@@ -370,7 +385,7 @@ void Game::processKeyPressed(const sf::Event::KeyPressed& key) {
                 );
                 setMusicVolume();
             }
-        } else if (enterPressed(key) && settingsSelection == 2) {
+        } else if (enterPressed(key) && settingsSelection == 3) {
             screenState = ScreenState::MainMenu;
         }
         return;
@@ -602,7 +617,7 @@ void Game::renderMainMenu() {
         window.draw(*menuLineText);
     }
 
-    menuLineText->setString("Up/Down: navigate   Enter: select");
+    menuLineText->setString("Up/Down: Navigate \n  Enter: Select");
     menuLineText->setFillColor(sf::Color(180, 180, 180));
     {
         const sf::FloatRect b = menuLineText->getLocalBounds();
@@ -654,9 +669,18 @@ void Game::renderSettingsScreen() {
         menuLineText->setOrigin({b.position.x + b.size.x / 2.f, b.position.y + b.size.y / 2.f});
         menuLineText->setPosition({cx, 300.f + (i * 60.f)});
         window.draw(*menuLineText);
+        if(i == 3){
+            settingsRtnBtn.setSize({b.size.x + 20, b.size.y + 20});
+            settingsRtnBtn.setOrigin({(b.size.x + 20.f) / 2.f, (b.size.y + 20.f) / 2.f});
+            settingsRtnBtn.setPosition({cx, 300.f + (i * 60.f)});
+            settingsRtnBtn.setFillColor(sf::Color::Transparent);
+            settingsRtnBtn.setOutlineThickness(3.f);
+            settingsRtnBtn.setOutlineColor(i == settingsSelection ? sf::Color::Yellow : sf::Color::Transparent);
+            window.draw(settingsRtnBtn);
+        }
     }
 
-    menuLineText->setString("Up/Down: row   Left/Right: adjust   Enter/Esc: back");
+    menuLineText->setString("   Up/Down: Row  \nLeft/Right: Adjust \n Enter/Esc: Back");
     menuLineText->setFillColor(sf::Color(180, 180, 180));
     {
         const sf::FloatRect b = menuLineText->getLocalBounds();
@@ -700,7 +724,7 @@ void Game::updateHudText() {
         statusText->setPosition({cx, 400.f});
     } else if (gameState == GameState::GameOver) {
         statusText->setCharacterSize(20);
-        statusText->setString("GAME OVER\nR / Space: try again     M / Esc: menu");
+        statusText->setString("    GAME OVER\nR / Space: Try Again \n  M / Esc: Menu");
         const sf::FloatRect b = statusText->getLocalBounds();
         statusText->setOrigin({b.position.x + b.size.x / 2.f, b.position.y + b.size.y / 2.f});
         statusText->setPosition({cx, 400.f});
