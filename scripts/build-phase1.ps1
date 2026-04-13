@@ -30,7 +30,7 @@ Write-Host "Using SFML root: $Sfml"
     (Join-Path $Root "Game.cpp") `
     (Join-Path $Root "src\GameManager.cpp") `
     "-L$Sfml\lib" `
-    -lsfml-graphics -lsfml-window -lsfml-system `
+    -lsfml-graphics -lsfml-window -lsfml-system -lsfml-audio `
     -o $Out
 
 if (-not (Test-Path -LiteralPath $Out)) {

@@ -7,11 +7,16 @@
 #include <filesystem>
 #include <random>
 #include <string>
+#include <iostream>
 
 #include "GameConstants.h"
 #include "GameHelpers.h"
 
 namespace {
+
+/**
+ * Attempts to load fonts, returns true if did load one from list, false if didn't/can't 
+ */
 bool tryLoadHudFont(sf::Font& font) {
     namespace fs = std::filesystem;
     // 1) Retro pixel (add PressStart2P-Regular.ttf under assets/fonts/ — SIL OFL).
@@ -33,6 +38,7 @@ bool tryLoadHudFont(sf::Font& font) {
     }
     return false;
 }
+
 
 /**
  * Return true if the passed key is down either in key or scan form, false if not
@@ -83,6 +89,18 @@ Game::Game()
     initialize();
 }
 
+
+void Game::loadAndPlayMusic( ) {
+    // sf::Music bkgMusic;
+    if(!Game::bkgMusic.openFromFile("assets/audio/mondamusic-retro-arcade-game-music-512837.wav")){
+        return;
+    }
+    std::cout << "Music Loaded" << std::endl;
+    bkgMusic.setVolume(80.f);
+    bkgMusic.setLooping(true);
+    bkgMusic.play();
+}
+
 /**
  * Handle gameplay loop monitoring keypresses, mouse clicks and other inputs, clearing the window, and updating/drawing the game elements
  */
@@ -118,6 +136,8 @@ void Game::initialize() {
     applyBallLaunchVelocity();
 
     initializeBricks();
+
+    loadAndPlayMusic();
 
     if (tryLoadHudFont(hudFont)) {
         hasHudFont = true;

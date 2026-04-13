@@ -3,6 +3,7 @@
 #include <cstddef>
 #include <SFML/System/Clock.hpp>
 #include <SFML/Graphics.hpp>
+#include <SFML/Audio.hpp>
 #include <optional>
 #include <vector>
 
@@ -53,12 +54,14 @@ private:
     bool ballIntersectsBrick(const Brick& brick) const;
     void handleBrickCollision(float dt);
     void drawBorders();
+    void loadAndPlayMusic();
 
     sf::Clock frameClock_;
     sf::RenderWindow window;
     sf::RectangleShape paddle;
     sf::CircleShape ball;
     sf::Font hudFont;
+    sf::Music bkgMusic;
     std::optional<sf::Text> scoreText;
     std::optional<sf::Text> livesText;
     std::optional<sf::Text> statusText;
