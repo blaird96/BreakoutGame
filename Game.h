@@ -55,6 +55,7 @@ private:
     void handleBrickCollision(float dt);
     void drawBorders();
     void loadAndPlayMusic();
+    void loadOtherSFX();
     void setMusicVolume();
     float getMusicVolume();
 
@@ -85,8 +86,23 @@ private:
     std::optional<std::size_t> collidingBrickIndex;
     PhysicsManager physicsManager;
     GameManager gameManager;
+    
     std::string musicFPath = "assets/audio/mondamusic-retro-arcade-game-music-512837.wav";
     float musicVolume = 50.f;
+
+    std::string btnAudioFPath = "assets/audio/mouse-click-negative-click-jam-fx-1-00-00.wav";
+    sf::SoundBuffer buttonSoundBuffer;
+    std::optional<sf::Sound> btnSound;
+
+    std::string brickDestroyFPath = "";
+    sf::SoundBuffer brickSoundBuffer;
+    std::optional<sf::Sound> brickSound;
+    bool brickSoundLoaded = false;
+
+    std::string ballBounceFPath = "";
+    sf::SoundBuffer bounceSoundBuffer;
+    std::optional<sf::Sound> bounceSound;
+    bool bounceSoundLoaded = false;
 
     bool prevEscDown_ = false;
     bool prevMDown_ = false;

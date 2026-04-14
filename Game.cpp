@@ -99,6 +99,27 @@ void Game::loadAndPlayMusic( ) {
     bkgMusic.play();
 }
 
+void Game::loadOtherSFX() {
+    if(!buttonSoundBuffer.loadFromFile(btnAudioFPath)) { std::cout << "Failed to Load Button Audio" << std::endl; }
+    btnSound.emplace(buttonSoundBuffer);
+    btnSound->setVolume(70.f);
+    if(!(ballBounceFPath == "")){
+        if(!bounceSoundBuffer.loadFromFile(ballBounceFPath)) { std::cout << "Failed to Load Bounce Audio" << std::endl; }
+        bounceSound.emplace(buttonSoundBuffer);
+        bounceSound->setVolume(70.f);
+        bounceSoundLoaded = true;
+    }
+    else { std::cout << "Haven't Assigned/Found a Bounce Audio File" << std::endl; }
+    if(!(brickDestroyFPath == "")){
+        if(!brickSoundBuffer.loadFromFile(brickDestroyFPath)) { std::cout << "Failed to Load Break Audio" << std::endl; }
+        brickSound.emplace(buttonSoundBuffer);
+        brickSound->setVolume(70.f);
+        brickSoundLoaded = true;
+    }
+    else { std::cout << "Haven't Assigned/Found a Break Audio File" << std::endl; }
+}
+
+
 /**
  * Actually sets the volume of the music, called after changed in settings menu
  */
@@ -148,6 +169,7 @@ void Game::initialize() {
     initializeBricks();
 
     loadAndPlayMusic();
+    loadOtherSFX();
 
     if (tryLoadHudFont(hudFont)) {
         hasHudFont = true;
@@ -242,6 +264,7 @@ void Game::handleMouseEvent(){
     if(screenState == ScreenState::MainMenu){
         if(playBtn.getGlobalBounds().contains(mousePos)){
             if(sf::Mouse::isButtonPressed(sf::Mouse::Button::Left)){
+                btnSound->play();
                 screenState = ScreenState::Game;
                 resetGame();
             }
@@ -249,6 +272,7 @@ void Game::handleMouseEvent(){
         }
         if(settingsBtn.getGlobalBounds().contains(mousePos)){
             if(sf::Mouse::isButtonPressed(sf::Mouse::Button::Left)){
+                btnSound->play();
                 screenState = ScreenState::Settings;
                 settingsSelection = 0;
             }
@@ -256,6 +280,7 @@ void Game::handleMouseEvent(){
         }
         if(quitBtn.getGlobalBounds().contains(mousePos)){
             if(sf::Mouse::isButtonPressed(sf::Mouse::Button::Left)){
+                btnSound->play();
                 window.close();
             }
             mainMenuSelection = 2;
@@ -264,6 +289,7 @@ void Game::handleMouseEvent(){
     else if(screenState == ScreenState::Settings){
         if(settingsRtnBtn.getGlobalBounds().contains(mousePos)){
             if(sf::Mouse::isButtonPressed(sf::Mouse::Button::Left)){
+                btnSound->play();
                 screenState = ScreenState::MainMenu;
             }
             settingsSelection = 3;
@@ -326,12 +352,15 @@ void Game::processKeyPressed(const sf::Event::KeyPressed& key) {
             mainMenuSelection = (mainMenuSelection + 1) % 3;
         } else if (enterPressed(key)) {
             if (mainMenuSelection == 0) {
+                btnSound->play();
                 screenState = ScreenState::Game;
                 resetGame();
             } else if (mainMenuSelection == 1) {
+                btnSound->play();
                 screenState = ScreenState::Settings;
                 settingsSelection = 0;
             } else {
+                btnSound->play();
                 window.close();
             }
         }
@@ -386,6 +415,7 @@ void Game::processKeyPressed(const sf::Event::KeyPressed& key) {
                 setMusicVolume();
             }
         } else if (enterPressed(key) && settingsSelection == 3) {
+            btnSound->play();
             screenState = ScreenState::MainMenu;
         }
         return;
@@ -456,16 +486,19 @@ void Game::update(float dt) {
     if (ball.getPosition().x >=
             (static_cast<float>(window.getSize().x) - (GameConstants::BorderXOffset + ball.getRadius())) ||
         ball.getPosition().x <= (GameConstants::BorderXOffset + ball.getRadius())) {
+        if(bounceSoundLoaded) {bounceSound->play();}
         physicsManager.reflectX();
     }
 
     if (ball.getPosition().y <= (GameConstants::BorderYOffset + ball.getRadius())) {
+        if(bounceSoundLoaded) {bounceSound->play();}
         physicsManager.reflectY();
     }
 
     if (ball.getPosition().y >= (GameConstants::PaddleYPos - paddle.getSize().y) &&
         ((ball.getPosition().x > (paddle.getPosition().x - (paddle.getSize().x / 2.f))) &&
          (ball.getPosition().x < (paddle.getPosition().x + (paddle.getSize().x / 2.f))))) {
+        if(bounceSoundLoaded) {bounceSound->play();}
         sf::Vector2f v = physicsManager.getVelocity();
         float speed = std::hypot(v.x, v.y);
         const float minSpeed = GameConstants::BallSpeedPxPerSec * ballSpeedMultiplier * 0.5f;
@@ -758,6 +791,7 @@ void Game::handleBrickCollision(float dt) {
     }
 
     if (collidingBrickIndex.has_value()) {
+        if(brickSoundLoaded) { brickSound->play(); }
         bricks[*collidingBrickIndex].isActive = false;
         score += 100;
         physicsManager.reflectY();
