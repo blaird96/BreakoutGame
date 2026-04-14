@@ -16,6 +16,34 @@
             "cStandard": "c17",
             "cppStandard": "c++20",
             "intelliSenseMode": "windows-gcc-x64"
+        },
+        {
+            "name": "Mac (Apple silicon)",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "${env:BREAKOUT_SFML_ROOT}/include",
+                "/opt/homebrew/include",
+                "/usr/local/include"
+            ],
+            "defines": [],
+            "compilerPath": "/usr/bin/clang++",
+            "cStandard": "c17",
+            "cppStandard": "c++20",
+            "intelliSenseMode": "macos-clang-arm64"
+        },
+        {
+            "name": "Mac (Intel)",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "${env:BREAKOUT_SFML_ROOT}/include",
+                "/opt/homebrew/include",
+                "/usr/local/include"
+            ],
+            "defines": [],
+            "compilerPath": "/usr/bin/clang++",
+            "cStandard": "c17",
+            "cppStandard": "c++20",
+            "intelliSenseMode": "macos-clang-x64"
         }
     ],
     "version": 4

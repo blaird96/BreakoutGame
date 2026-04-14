@@ -3,5 +3,8 @@
     // committing machine-specific toolchain folders into shared settings.
     "terminal.integrated.env.windows": {
         "PATH": "${workspaceFolder}/runtime;${env:BREAKOUT_RUNTIME_BIN};${env:PATH}"
+    },
+    "terminal.integrated.env.osx": {
+        "PATH": "${env:PATH}"
     }
 }
