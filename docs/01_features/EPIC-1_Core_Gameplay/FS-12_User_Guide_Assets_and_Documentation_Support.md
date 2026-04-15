@@ -3,6 +3,8 @@
 **Category:** Documentation Support  
 **Priority:** Medium  
 
+> **Overlap review note:** Setup/troubleshooting content that is developer-facing overlaps with `docs/development.md`. Review duplicate build/dependency guidance in this spec before final documentation cleanup (do not delete yet).
+
 ---
 
 ## Status (as of 2026-04-01)

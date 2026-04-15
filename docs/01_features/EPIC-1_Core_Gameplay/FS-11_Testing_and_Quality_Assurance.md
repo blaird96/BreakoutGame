@@ -3,6 +3,8 @@
 **Category:** Quality Assurance  
 **Priority:** High  
 
+> **Overlap review note:** Practical developer test-execution guidance now lives in `docs/development.md`. Review overlapping implementation/testing-consideration instructions in this spec for possible reduction while preserving QA requirements (do not delete yet).
+
 ---
 
 ## Status (as of 2026-04-01)

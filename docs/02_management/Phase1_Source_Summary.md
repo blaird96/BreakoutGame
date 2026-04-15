@@ -1,5 +1,7 @@
 # Phase 1 Source Summary
 
+> **Overlap review note:** Development workflow details in `## Testing Approach` and environment/tooling bullets in `## Limitations` overlap with `docs/development.md`; review for possible consolidation (do not delete yet).
+
 ## Implemented Features
 
 Phase 1 delivers the playable core loop for Breakout:

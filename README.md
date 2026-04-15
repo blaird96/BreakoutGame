@@ -2,6 +2,8 @@
 
 Breakout implemented in C++ with SFML for UMGC CMSC 495 Group 3 Capstone.
 
+> **Overlap review note:** Development workflow content in this file overlaps with `docs/development.md`. Review these sections for possible consolidation (do not delete yet): **Setup Instructions (Windows)**, **Build and Run**, **Automated Tests**, and environment/tooling bullets in **Known Limitations**.
+
 ## Overview
 
 Short video walkthrough (team reference): https://youtu.be/RHrU3I1nsEI?si=UbCCL5GwQ7aRh6ua&t=64

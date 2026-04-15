@@ -3,6 +3,8 @@
 **Category:** Engineering Support  
 **Priority:** High  
 
+> **Overlap review note:** This specification contains development-environment and build workflow details that overlap with `docs/development.md`. Keep this feature spec focused on requirements/ownership and review implementation-level setup/run instructions here for potential trimming (do not delete yet).
+
 ---
 
 ## Status (as of 2026-04-01)
