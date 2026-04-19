@@ -28,7 +28,7 @@ Phase I establishes a playable foundation of Breakout with:
 
 ## Setup Instructions (Windows)
 
-This repo targets **C++20 + SFML 3.0.2** on Windows and now supports multiple compatible GCC layouts through the shared PowerShell toolchain resolver. The current scripts can auto-detect common installs such as **MSYS2 UCRT64** and the team’s original **WinLibs GCC 14.2** layout, or you can point the repo at your local install with environment variables. A CMake-based build is also included for a more portable setup and for running the automated unit tests.
+This repo targets **C++20 + SFML 3.0.2** on Windows and now supports multiple compatible GCC layouts through the shared PowerShell toolchain resolver. The current scripts can auto-detect common installs such as **MSYS2 UCRT64** and the team’s original **WinLibs GCC 14.2** layout, or you can point the repo at your local install with environment variables. A **CMake** build is included at the repository root ([`CMakeLists.txt`](CMakeLists.txt)) for a more portable setup and for running the automated unit tests via **CTest** (see [`CMakePresets.json`](CMakePresets.json)).
 
 ### 1) Toolchain (compiler)
 
@@ -155,18 +155,25 @@ Bundled MinGW/SFML DLLs live under **`runtime\`** after `build-phase1.ps1`. Wind
 
 ## Automated Tests
 
-The repository now includes a small CTest-based unit test target under `tests/` for deterministic helper and state logic:
+The repository includes a small **CTest**-registered unit test executable under `tests/` for deterministic helper, state, and collision math:
 
 - `tests/GameHelpersTests.cpp`
 - `tests/GameManagerTests.cpp`
 - `tests/PhysicsManagerTests.cpp`
+- `tests/Collision2DTests.cpp`
 
-Configure and build the tests from the repo root:
+Configure and build the tests from the repo root (requires `cmake` / `ctest` on your PATH, for example MSYS2 `mingw-w64-ucrt-x86_64-cmake`):
 
 ```powershell
 cmake --preset tests-debug
 cmake --build --preset tests-debug
 ctest --preset tests-debug
+```
+
+Or run the wrapper script:
+
+```powershell
+.\scripts\build-tests.ps1
 ```
 
 These tests cover:
@@ -175,6 +182,7 @@ These tests cover:
 - remaining-brick helper logic
 - game manager life reset, decrement, and game-state setters
 - physics manager velocity storage and axis reflection behavior
+- circle–AABB overlap, separation, axis-correct reflection, wall clamp helpers, and multi-brick resolution loops (`src/Collision2D.h`)
 
 ## Controls
 
@@ -210,7 +218,7 @@ Some editors still capture `Esc` while debugging; use **`M`** for menu, or run `
 - Core game loop and rendering pipeline
 - Paddle and ball entities
 - Brick grid (5x8) with active/inactive lifecycle
-- Brick collision detection and bounce response
+- Brick collision detection with circle–AABB resolution (side-aware bounce, separation, multi-hit per frame cap)
 - Score increment on brick hit
 - Lives clamped to zero (no negative values)
 - Win condition when all bricks are cleared
@@ -225,6 +233,6 @@ Some editors still capture `Esc` while debugging; use **`M`** for menu, or run `
 
 - The shared toolchain setup is more portable than before, but it is still Windows-focused and depends on a locally installed compatible GCC + SFML toolchain.
 - On-screen HUD text needs a loadable font; if none load, fallback menu mode applies (see above).
-- Automated tests currently focus on deterministic helper and state logic; gameplay integration is still primarily verified through manual testing.
+- Automated tests cover deterministic helpers, manager state, physics reflections, and **pure collision math** (`Collision2D`); full SFML gameplay integration is still verified primarily through manual testing.
 - Movement uses per-frame delta time so speed stays consistent if the frame rate changes.
-- Brick collision response is intentionally simple and currently uses a basic bounce rule rather than a more advanced directional solver.
+- Brick collision uses a bounded per-frame resolver (side-aware reflection and separation); simultaneous paddle–brick contacts at very high speed can still be ordering-sensitive.

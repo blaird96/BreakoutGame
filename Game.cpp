@@ -11,6 +11,7 @@
 
 #include "GameConstants.h"
 #include "GameHelpers.h"
+#include "src/Collision2D.h"
 
 namespace {
 
@@ -105,14 +106,14 @@ void Game::loadOtherSFX() {
     btnSound->setVolume(70.f);
     if(!(ballBounceFPath == "")){
         if(!bounceSoundBuffer.loadFromFile(ballBounceFPath)) { std::cout << "Failed to Load Bounce Audio" << std::endl; }
-        bounceSound.emplace(buttonSoundBuffer);
+        bounceSound.emplace(bounceSoundBuffer);
         bounceSound->setVolume(70.f);
         bounceSoundLoaded = true;
     }
     else { std::cout << "Haven't Assigned/Found a Bounce Audio File" << std::endl; }
     if(!(brickDestroyFPath == "")){
         if(!brickSoundBuffer.loadFromFile(brickDestroyFPath)) { std::cout << "Failed to Load Break Audio" << std::endl; }
-        brickSound.emplace(buttonSoundBuffer);
+        brickSound.emplace(brickSoundBuffer);
         brickSound->setVolume(70.f);
         brickSoundLoaded = true;
     }
@@ -476,46 +477,73 @@ void Game::handleInput(float dt) {
  * Handles the ball collisions including the paddle, walls, and the bricks
  */
 void Game::update(float dt) {
+    (void)dt;
     if (screenState != ScreenState::Game || gameState != GameState::Playing) {
         return;
     }
 
     collidingBrickIndex.reset();
+    const float winW = static_cast<float>(window.getSize().x);
+    const float ballR = ball.getRadius();
+
     ball.setPosition(ball.getPosition() + physicsManager.getVelocity() * dt);
+    sf::Vector2f pos = ball.getPosition();
 
-    if (ball.getPosition().x >=
-            (static_cast<float>(window.getSize().x) - (GameConstants::BorderXOffset + ball.getRadius())) ||
-        ball.getPosition().x <= (GameConstants::BorderXOffset + ball.getRadius())) {
-        if(bounceSoundLoaded) {bounceSound->play();}
+    const float minX = GameConstants::BorderXOffset + ballR;
+    const float maxX = winW - GameConstants::BorderXOffset - ballR;
+    const float minY = GameConstants::BorderYOffset + ballR;
+    bool wallBounceSound = false;
+    if (pos.x < minX) {
+        pos.x = minX;
         physicsManager.reflectX();
+        wallBounceSound = true;
+    } else if (pos.x > maxX) {
+        pos.x = maxX;
+        physicsManager.reflectX();
+        wallBounceSound = true;
     }
-
-    if (ball.getPosition().y <= (GameConstants::BorderYOffset + ball.getRadius())) {
-        if(bounceSoundLoaded) {bounceSound->play();}
+    if (pos.y < minY) {
+        pos.y = minY;
         physicsManager.reflectY();
+        wallBounceSound = true;
     }
+    if (wallBounceSound && bounceSoundLoaded) {
+        bounceSound->play();
+    }
+    ball.setPosition(pos);
 
-    if (ball.getPosition().y >= (GameConstants::PaddleYPos - paddle.getSize().y) &&
-        ((ball.getPosition().x > (paddle.getPosition().x - (paddle.getSize().x / 2.f))) &&
-         (ball.getPosition().x < (paddle.getPosition().x + (paddle.getSize().x / 2.f))))) {
-        if(bounceSoundLoaded) {bounceSound->play();}
-        sf::Vector2f v = physicsManager.getVelocity();
-        float speed = std::hypot(v.x, v.y);
-        const float minSpeed = GameConstants::BallSpeedPxPerSec * ballSpeedMultiplier * 0.5f;
-        if (speed < minSpeed) {
-            speed = GameConstants::BallSpeedPxPerSec * ballSpeedMultiplier;
+    handleBrickCollisions();
+
+    pos = ball.getPosition();
+    sf::Vector2f vel = physicsManager.getVelocity();
+    if (vel.y > 0.f) {
+        const Collision2D::Circle ballCirc{pos.x, pos.y, ballR};
+        const sf::Vector2f paddlePos = paddle.getPosition();
+        const Collision2D::Aabb paddleAabb = Collision2D::aabbFromCenterSize(
+            paddlePos.x, paddlePos.y, paddle.getSize().x, paddle.getSize().y);
+        if (Collision2D::circleIntersectsAabb(ballCirc, paddleAabb)) {
+            const auto sep = Collision2D::resolveCircleAabb(
+                ballCirc, paddleAabb, {vel.x, vel.y}, 0.02f);
+            ball.setPosition({sep.cx, sep.cy});
+            if (bounceSoundLoaded) {
+                bounceSound->play();
+            }
+            vel = physicsManager.getVelocity();
+            float speed = std::hypot(vel.x, vel.y);
+            const float minSpeed = GameConstants::BallSpeedPxPerSec * ballSpeedMultiplier * 0.5f;
+            if (speed < minSpeed) {
+                speed = GameConstants::BallSpeedPxPerSec * ballSpeedMultiplier;
+            }
+            const float halfW = paddle.getSize().x * 0.5f;
+            const float hitT =
+                std::clamp((ball.getPosition().x - paddlePos.x) / halfW, -1.f, 1.f);
+            const float maxRad = GameConstants::PaddleEnglishMaxAngleDeg * (3.14159265f / 180.f);
+            const float angle = hitT * maxRad;
+            const float newVx = std::sin(angle) * speed;
+            const float newVy = -std::cos(angle) * speed;
+            physicsManager.setVelocity({newVx, newVy});
         }
-        const float halfW = paddle.getSize().x * 0.5f;
-        const float hitT =
-            std::clamp((ball.getPosition().x - paddle.getPosition().x) / halfW, -1.f, 1.f);
-        const float maxRad = GameConstants::PaddleEnglishMaxAngleDeg * (3.14159265f / 180.f);
-        const float angle = hitT * maxRad;
-        const float newVx = std::sin(angle) * speed;
-        const float newVy = -std::cos(angle) * speed;
-        physicsManager.setVelocity({newVx, newVy});
     }
-
-    handleBrickCollision(dt);
     const int activeBrickCount = static_cast<int>(
         std::count_if(bricks.begin(), bricks.end(), [](const Brick& brick) { return brick.isActive; }));
     if (!GameHelpers::hasRemainingBricks(activeBrickCount)) {
@@ -769,33 +797,62 @@ void Game::updateHudText() {
 }
 
 /**
- * If ball collides passed brick return true, else return false
+ * Resolves ball–brick overlaps: side-aware reflection, separation, and multiple hits per frame
+ * (bounded) so the ball cannot tunnel through stacked bricks.
  */
-bool Game::ballIntersectsBrick(const Brick& brick) const {
-    return ball.getGlobalBounds().findIntersection(brick.shape.getGlobalBounds()).has_value();
-}
+void Game::handleBrickCollisions() {
+    constexpr int kMaxResolveIters = 8;
+    constexpr float kSepEpsilon = 0.02f;
+    bool playedBrickSound = false;
 
-/**
- * Handles the collisions between ball and bricks if occur, changing ball speed/position
- */
-void Game::handleBrickCollision(float dt) {
-    for (std::size_t index = 0; index < bricks.size(); ++index) {
-        const Brick& brick = bricks[index];
-        if (!brick.isActive) {
-            continue;
+    for (int iter = 0; iter < kMaxResolveIters; ++iter) {
+        const Collision2D::Circle ballCirc{
+            ball.getPosition().x, ball.getPosition().y, ball.getRadius()};
+        std::optional<std::size_t> hitIndex;
+
+        for (std::size_t i = 0; i < bricks.size(); ++i) {
+            if (!bricks[i].isActive) {
+                continue;
+            }
+            const sf::FloatRect gr = bricks[i].shape.getGlobalBounds();
+            const Collision2D::Aabb box{gr.position.x,
+                                        gr.position.y,
+                                        gr.position.x + gr.size.x,
+                                        gr.position.y + gr.size.y};
+            if (Collision2D::circleIntersectsAabb(ballCirc, box)) {
+                hitIndex = i;
+                break;
+            }
         }
-        if (ballIntersectsBrick(brick)) {
-            collidingBrickIndex = index;
+
+        if (!hitIndex.has_value()) {
             break;
         }
+
+        const sf::FloatRect gr = bricks[*hitIndex].shape.getGlobalBounds();
+        const Collision2D::Aabb box{gr.position.x,
+                                    gr.position.y,
+                                    gr.position.x + gr.size.x,
+                                    gr.position.y + gr.size.y};
+        const sf::Vector2f v = physicsManager.getVelocity();
+        const auto resolved =
+            Collision2D::resolveCircleAabb(ballCirc, box, {v.x, v.y}, kSepEpsilon);
+
+        bricks[*hitIndex].isActive = false;
+        score += 100;
+        collidingBrickIndex = hitIndex;
+        playedBrickSound = true;
+
+        if (resolved.reflectX) {
+            physicsManager.reflectX();
+        } else {
+            physicsManager.reflectY();
+        }
+        ball.setPosition({resolved.cx, resolved.cy});
     }
 
-    if (collidingBrickIndex.has_value()) {
-        if(brickSoundLoaded) { brickSound->play(); }
-        bricks[*collidingBrickIndex].isActive = false;
-        score += 100;
-        physicsManager.reflectY();
-        ball.setPosition(ball.getPosition() + physicsManager.getVelocity() * dt * 2.f);
+    if (playedBrickSound && brickSoundLoaded) {
+        brickSound->play();
     }
 }
 

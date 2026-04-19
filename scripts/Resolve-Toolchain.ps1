@@ -54,6 +54,39 @@ function Get-FirstValidSfmlRoot {
     return $null
 }
 
+function Get-Msys2RootFromCompilerPath {
+    param([string]$CompilerPath)
+
+    if ([string]::IsNullOrWhiteSpace($CompilerPath)) {
+        return $null
+    }
+
+    $compilerDir = Split-Path -Parent $CompilerPath
+    if ([string]::IsNullOrWhiteSpace($compilerDir)) {
+        return $null
+    }
+
+    $ucrtDir = Split-Path -Parent $compilerDir
+    if ([string]::IsNullOrWhiteSpace($ucrtDir)) {
+        return $null
+    }
+
+    if ((Split-Path -Leaf $ucrtDir) -ne 'ucrt64') {
+        return $null
+    }
+
+    $msys2Root = Split-Path -Parent $ucrtDir
+    if ([string]::IsNullOrWhiteSpace($msys2Root)) {
+        return $null
+    }
+
+    if (Test-Path -LiteralPath (Join-Path $msys2Root 'usr\bin') -PathType Container) {
+        return $msys2Root
+    }
+
+    return $null
+}
+
 function Resolve-BreakoutToolchain {
     $gppCandidates = @(
         $env:BREAKOUT_GPP,
@@ -104,11 +137,27 @@ function Resolve-BreakoutToolchain {
         $sfmlBin = Join-Path $sfmlRoot "bin"
     }
 
+    $msys2Root = Get-FirstExistingPath -Candidates @(
+        $env:MSYS2_ROOT,
+        $(Get-Msys2RootFromCompilerPath -CompilerPath $gpp),
+        'C:\msys64'
+    ) -Directory
+
+    $msys2UsrBin = $null
+    if ($msys2Root) {
+        $candidateUsrBin = Join-Path $msys2Root 'usr\bin'
+        if (Test-Path -LiteralPath $candidateUsrBin -PathType Container) {
+            $msys2UsrBin = $candidateUsrBin
+        }
+    }
+
     [pscustomobject]@{
         Gpp         = $gpp
         Gdb         = $gdb
         SfmlRoot    = $sfmlRoot
         CompilerBin = $compilerBin
         SfmlBin     = $sfmlBin
+        Msys2Root   = $msys2Root
+        Msys2UsrBin = $msys2UsrBin
     }
 }

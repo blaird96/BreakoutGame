@@ -21,6 +21,13 @@
 - **Partially complete:** No CI pipeline yet; test-to-feature traceability and defect workflow are still lightweight.
 - **Outstanding:** Add CI build/test automation, formalize defect tracking severity and process, and expand regression coverage for gameplay integration paths.
 
+### 2026-04-19 Addendum
+
+- **Updated implementation status:** Partially complete (~70%)
+- **Current evidence:** Same as above, plus [`tests/Collision2DTests.cpp`](../../../tests/Collision2DTests.cpp) for pure circle–AABB collision math; root `CMakeLists.txt` wires `breakout_tests` when `BUILD_TESTING=ON` (matches [`CMakePresets.json`](../../../CMakePresets.json) `tests-debug`).
+- **Complete now:** Deterministic unit coverage for helpers, game manager state, physics reflections, and **collision resolution predicates** without running the SFML game loop.
+- **Outstanding:** CI on push/PR; broader integration tests (full `Game` loop) remain manual or future work.
+
 ---
 
 ## Purpose and scope
@@ -44,7 +51,7 @@
 | --- | --- |
 | Test matrix | Spreadsheet or markdown table (team choice) — recommend `docs/02_management/` or appendix |
 | Defect log | Issue tracker or `Evidence_Log.md` / team template |
-| Automated tests | Future: `tests/` + CMake + GoogleTest or Catch2 — **not present** |
+| Automated tests | `tests/` lightweight harness (`TestHarness.h`) + `CTest` via root [`CMakeLists.txt`](../../../CMakeLists.txt); optional [`scripts/build-tests.ps1`](../../../scripts/build-tests.ps1) |
 | CI job | Future: GitHub Actions or similar |
 
 ---
@@ -100,7 +107,7 @@
 
 **As-built:** Strategy-only; implement checklist in `Evidence_Log` or dedicated QA doc per team preference.
 
-**Target:** Extract `Collision` namespace with no SFML deps for unit tests; keep rendering in integration manual tests.
+**As-built (2026-04-19):** `Collision2D` in [`src/Collision2D.h`](../../../src/Collision2D.h) is SFML-free; Phase I `Game` links it for runtime collision. Rendering and full gameplay remain integration-tested manually.
 
 ---
 
@@ -109,7 +116,7 @@
 - Manual: 5-minute idle run — memory/CPU sanity.
 - Manual: lose all lives post FS-06 fix — verifies game over.
 - Manual: clear bricks — verifies win.
-- Unit (future): circle vs AABB hit test vectors.
+- Unit: circle vs AABB overlap and resolution (`Collision2DTests.cpp`).
 
 ---
 

@@ -15,7 +15,8 @@
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Debug",
                 "CMAKE_CXX_COMPILER": "$env{BREAKOUT_GPP}",
-                "BREAKOUT_SFML_ROOT": "$env{BREAKOUT_SFML_ROOT}"
+                "BREAKOUT_SFML_ROOT": "$env{BREAKOUT_SFML_ROOT}",
+                "BUILD_TESTING": "OFF"
             }
         },
         {

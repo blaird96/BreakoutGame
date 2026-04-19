@@ -51,8 +51,7 @@ private:
     void processKeyPressed(const sf::Event::KeyPressed& key);
     void pollKeyboardShortcuts();
     void handleMouseEvent();
-    bool ballIntersectsBrick(const Brick& brick) const;
-    void handleBrickCollision(float dt);
+    void handleBrickCollisions();
     void drawBorders();
     void loadAndPlayMusic();
     void loadOtherSFX();
