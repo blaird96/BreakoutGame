@@ -93,6 +93,7 @@ private:
     std::string btnAudioFPath = "assets/audio/mouse-click-negative-click-jam-fx-1-00-00.wav";
     sf::SoundBuffer buttonSoundBuffer;
     std::optional<sf::Sound> btnSound;
+    bool btnSoundLoaded = false;
 
     std::string brickDestroyFPath = "";
     sf::SoundBuffer brickSoundBuffer;
