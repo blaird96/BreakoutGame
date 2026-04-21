@@ -12,6 +12,12 @@ $Gpp = $Toolchain.Gpp
 $Sfml = $Toolchain.SfmlRoot
 $Out = Join-Path $Root "main.exe"
 
+if ($Toolchain.Msys2UsrBin) {
+    $pathParts = @($Toolchain.CompilerBin, $Toolchain.Msys2UsrBin, $env:PATH) |
+        Where-Object { -not [string]::IsNullOrWhiteSpace($_) }
+    $env:PATH = ($pathParts | Select-Object -Unique) -join ';'
+}
+
 if (-not $Gpp) {
     throw "Could not find g++.exe. Set BREAKOUT_GPP or put g++.exe on PATH."
 }
@@ -100,6 +106,7 @@ $SfmlBin = $Toolchain.SfmlBin
 $BinSearch = @(
     $CompilerBin
     $SfmlBin
+    $Toolchain.Msys2UsrBin
     $(if ($env:MSYS2_ROOT) { Join-Path $env:MSYS2_ROOT "ucrt64\bin" })
     $(if ($env:BREAKOUT_RUNTIME_BIN) { $env:BREAKOUT_RUNTIME_BIN -split ";" })
 ) | Where-Object { -not [string]::IsNullOrWhiteSpace($_) } | Select-Object -Unique

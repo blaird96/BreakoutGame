@@ -16,10 +16,18 @@
 ### 2026-04-09 Addendum
 
 - **Updated implementation status:** Mostly complete (~80%)
-- **Current evidence:** `Game.cpp` (`update`, `handleBrickCollision`, paddle-angle bounce code)
+- **Current evidence:** `Game.cpp` (`update`, `handleBrickCollisions`, paddle-angle bounce code)
 - **Complete now:** Paddle collision with angle-based response, active brick collision detection, single-brick-per-frame deactivation, score trigger on brick hit.
 - **Partially complete:** Brick response uses simplified reflection and overlap checks; limited penetration/tunneling handling.
 - **Outstanding:** Improve side-aware collision normal resolution, add stronger overlap correction, and verify deterministic multi-contact behavior.
+
+### 2026-04-19 Addendum
+
+- **Updated implementation status:** Complete for Phase I collision goals (~95%)
+- **Current evidence:** `Game.cpp` (`update`, wall clamp, `handleBrickCollisions`, paddle AABB + descending-velocity guard + English); [`src/Collision2D.h`](../../../src/Collision2D.h) (circle–AABB intersect, separation, axis reflection); [`tests/Collision2DTests.cpp`](../../../tests/Collision2DTests.cpp)
+- **Complete now:** Left/right/top wall reflection with center clamp to legal inset bounds; brick hits use circle–AABB resolution with **side-aware** `reflectX` / `reflectY`, separation epsilon, and a **bounded multi-hit loop** per frame; paddle uses **full AABB** from center + size, requires **downward ball velocity** before accepting a hit, then separation + English.
+- **Partially complete:** Order of resolution is walls → bricks → paddle (documented tradeoff for simultaneous paddle–brick contacts at high speed).
+- **Outstanding:** Optional swept tests for extreme speed × `dt`; optional shared collision use from legacy `src/main.cpp` prototype.
 
 ---
 
@@ -78,7 +86,7 @@
 
 **Outputs:** Mutated `velocity`; callbacks or direct mutation to bricks; possible score event to FS-06.
 
-**As-built:** Inline checks in `main` after position update (`main.cpp` 46–52).
+**As-built:** Phase I uses `Collision2D` helpers from `Game::update` / `Game::handleBrickCollisions` (see repository root `Game.cpp`).
 
 ---
 
