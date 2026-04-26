@@ -149,6 +149,10 @@ void Game::setMusicVolume(){
  */
 float Game::getMusicVolume(){ return Game::musicVolume; }
 
+/**
+ * Called when game is initialized and hevever main menu is swapped to, gets high score for
+ * display in the menu.
+ */
 void Game::loadHighScores(){
     sqlite3* dbConnection;
 
@@ -163,10 +167,16 @@ void Game::loadHighScores(){
         }
     }
     else {std::cout << "Error getting scores" << std::endl; }
+    sqlite3_finalize(stmt);
 
     sqlite3_close(dbConnection);
 }
 
+/**
+ * Called on the initialization of the app. Creates the db if not, check it can open if 
+ * created or already exists, creates table if not exists (via sql logic) and populates 
+ * the table with basline enntries if not already, via c++ logic.
+ */
 void Game::createAndPopulateTable(){
     sqlite3* db;
     std::string tblStr = "CREATE TABLE IF NOT EXISTS SCORES("
@@ -221,7 +231,32 @@ void Game::createAndPopulateTable(){
     
 }
 
-
+/**
+ * Updates the passed level's score to the passed score value in the database
+ */
+void Game::updateScore(int level, int score){
+    sqlite3* db;
+    int exit = sqlite3_open("./BreakOutScores.db", &db);
+    sqlite3_stmt* stmt;
+    std::string sql = "SELECT score FROM scores WHERE level = " + std::to_string(level) + ";";
+    int prevStoreScore;
+    if (sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, nullptr) == SQLITE_OK) {
+        while (sqlite3_step(stmt) == SQLITE_ROW) {
+            prevStoreScore = sqlite3_column_int(stmt, 0);
+        }
+    }
+    sqlite3_finalize(stmt);
+    if(prevStoreScore < score){
+        char* updateErr;
+        std::string scoreUpdateSQL = "UPDATE scores SET score = " + std::to_string(score) + " WHERE level = " + std::to_string(level) + ";";
+        exit = sqlite3_exec(db, scoreUpdateSQL.c_str(), NULL, 0, &updateErr);
+        if(exit != SQLITE_OK ){
+            std::cerr << "Score Update Failed" << std::endl;
+            sqlite3_free(updateErr);
+        }
+        else { std::cout << "Score Updated with no errors" << std::endl; }
+    } 
+}
 
 /**
  * Handle gameplay loop monitoring keypresses, mouse clicks and other inputs, clearing the window, and updating/drawing the game elements
@@ -383,6 +418,7 @@ void Game::handleMouseEvent(){
             if(sf::Mouse::isButtonPressed(sf::Mouse::Button::Left)){
                 if(btnSoundLoaded){btnSound->play();}
                 screenState = ScreenState::MainMenu;
+                loadHighScores();
             }
             settingsSelection = 3;
         }
@@ -402,10 +438,12 @@ void Game::pollKeyboardShortcuts() {
         if (gameState == GameState::Playing) {
             if (esc && !prevEscDown_) {
                 screenState = ScreenState::MainMenu;
+                loadHighScores();
             }
         } else {
             if ((esc && !prevEscDown_) || (m && !prevMDown_)) {
                 screenState = ScreenState::MainMenu;
+                loadHighScores();
             } else if ((r && !prevRDown_) || (sp && !prevSpaceDown_)) {
                 resetGame();
             }
@@ -462,6 +500,7 @@ void Game::processKeyPressed(const sf::Event::KeyPressed& key) {
     if (screenState == ScreenState::Settings) {
         if (escapePressed(key) || backPressed(key)) {
             screenState = ScreenState::MainMenu;
+            loadHighScores();
             return;
         }
         if (k == sf::Keyboard::Key::Up) {
@@ -509,6 +548,7 @@ void Game::processKeyPressed(const sf::Event::KeyPressed& key) {
         } else if (enterPressed(key) && settingsSelection == 3) {
             if(btnSoundLoaded){btnSound->play();}
             screenState = ScreenState::MainMenu;
+            loadHighScores();
         }
         return;
     }
@@ -639,6 +679,7 @@ void Game::update(float dt) {
         std::count_if(bricks.begin(), bricks.end(), [](const Brick& brick) { return brick.isActive; }));
     if (!GameHelpers::hasRemainingBricks(activeBrickCount)) {
         gameState = GameState::Won;
+        updateScore(1, score);
         return;
     }
 
@@ -649,7 +690,6 @@ void Game::update(float dt) {
 
     if (gameManager.haveDied()) {
         gameState = GameState::GameOver;
-        //paddle.setFillColor(sf::Color::Red);
     }
 }
 

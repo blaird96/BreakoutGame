@@ -61,6 +61,7 @@ private:
     float getMusicVolume();
     void loadHighScores();
     void createAndPopulateTable();
+    void updateScore(int level, int score);
 
     int hiScore;
     std::vector<int> hiScores;
