@@ -102,7 +102,7 @@ private:
     std::optional<sf::Sound> btnSound;
     bool btnSoundLoaded = false;
 
-    std::string brickDestroyFPath = "";
+    std::string brickDestroyFPath = "assets/audio/stone-building-destroyed-epic-stock-media-1-00-01.wav";
     sf::SoundBuffer brickSoundBuffer;
     std::optional<sf::Sound> brickSound;
     bool brickSoundLoaded = false;

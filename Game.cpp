@@ -129,7 +129,7 @@ void Game::loadOtherSFX() {
         if(!brickSoundBuffer.loadFromFile(brickDestroyFPath)) { std::cout << "Failed to Load Break Audio" << std::endl; }
         else{
             brickSound.emplace(brickSoundBuffer);
-            brickSound->setVolume(70.f);
+            brickSound->setVolume(40.f);
             brickSoundLoaded = true;
         }
     }
