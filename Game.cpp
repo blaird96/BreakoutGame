@@ -679,6 +679,25 @@ void Game::update(float dt) {
         std::count_if(bricks.begin(), bricks.end(), [](const Brick& brick) { return brick.isActive; }));
     if (!GameHelpers::hasRemainingBricks(activeBrickCount)) {
         gameState = GameState::Won;
+        int livesRemaining = gameManager.getLives();
+        /**
+         * Scoring breakdown:
+         * Last life is worth 200pts
+         * Second to last life is worth 300pts (500pts total)
+         * First life is worth 500pts (1000pts total)
+         * Open to changes on this
+         */
+        switch(livesRemaining){
+            case 3:
+                score += 1000; 
+                break;
+            case 2:
+                score += 500;
+                break;
+            case 1:
+                score += 200;
+                break;
+        }
         updateScore(1, score);
         return;
     }
