@@ -6,6 +6,7 @@
 #include <SFML/Audio.hpp>
 #include <optional>
 #include <vector>
+#include "sqlite3.h"
 
 #include "src/GameManager.h"
 #include "src/PhysicsManager.h"
@@ -14,6 +15,7 @@ class Game {
 public:
     Game();
     void run();
+    
 
 private:
     enum class ScreenState {
@@ -57,7 +59,11 @@ private:
     void loadOtherSFX();
     void setMusicVolume();
     float getMusicVolume();
+    void loadHighScores();
+    void createAndPopulateTable();
 
+    int hiScore;
+    std::vector<int> hiScores;
     sf::Clock frameClock_;
     sf::RenderWindow window;
     sf::RectangleShape paddle;
@@ -70,6 +76,7 @@ private:
     bool hasHudFont = false;
     std::optional<sf::Text> menuTitleText;
     std::optional<sf::Text> menuLineText;
+    std::optional<sf::Text> hiScoreText;
     sf::RectangleShape playBtn;
     sf::RectangleShape settingsBtn;
     sf::RectangleShape quitBtn;
@@ -103,6 +110,7 @@ private:
     sf::SoundBuffer bounceSoundBuffer;
     std::optional<sf::Sound> bounceSound;
     bool bounceSoundLoaded = false;
+
 
     bool prevEscDown_ = false;
     bool prevMDown_ = false;

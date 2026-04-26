@@ -44,6 +44,8 @@ echo "Using SFML root: ${SFML}"
   "${ROOT}/src/GameManager.cpp" \
   "-L${SFML}/lib" \
   -lsfml-graphics -lsfml-window -lsfml-system \
+  "-L$Root\lib" \
+  -lsqlite3  \
   -o "${OUT}"
 
 echo "Built: ${OUT}"

@@ -8,6 +8,7 @@
 #include <random>
 #include <string>
 #include <iostream>
+#include <stdio.h>
 
 #include "GameConstants.h"
 #include "GameHelpers.h"
@@ -15,6 +16,7 @@
 
 namespace {
 
+bool poptable = false;
 /**
  * Attempts to load fonts, returns true if did load one from list, false if didn't/can't 
  */
@@ -88,6 +90,8 @@ Game::Game()
     : window(sf::VideoMode({GameConstants::WindowWidth, GameConstants::WindowHeight}),
              GameConstants::WindowTitle) {
     initialize();
+    createAndPopulateTable();
+    loadHighScores();
 }
 
 /**
@@ -145,6 +149,80 @@ void Game::setMusicVolume(){
  */
 float Game::getMusicVolume(){ return Game::musicVolume; }
 
+void Game::loadHighScores(){
+    sqlite3* dbConnection;
+
+    int exit = sqlite3_open("./BreakOutScores.db", &dbConnection);
+    sqlite3_stmt* stmt;
+    const char* sql = "SELECT score FROM scores WHERE level = 1;";
+    if (sqlite3_prepare_v2(dbConnection, sql, -1, &stmt, nullptr) == SQLITE_OK) {
+        while (sqlite3_step(stmt) == SQLITE_ROW) {
+            int score = sqlite3_column_int(stmt, 0);
+            std::cout << "Read Score: " << score << std::endl;
+            hiScore = score;
+        }
+    }
+    else {std::cout << "Error getting scores" << std::endl; }
+
+    sqlite3_close(dbConnection);
+}
+
+void Game::createAndPopulateTable(){
+    sqlite3* db;
+    std::string tblStr = "CREATE TABLE IF NOT EXISTS SCORES("
+                                "level INTEGER PRIMARY KEY,"  
+                                "score INTEGER NOT NULL"
+                                ")";
+    try {
+        int exit = 0;
+        exit = sqlite3_open("./BreakOutScores.db", &db);
+
+        char* messRes;
+        exit = sqlite3_exec(db, tblStr.c_str(), NULL, 0, &messRes);
+
+        if (exit != SQLITE_OK) {
+            std::cerr << "Couldn't Make Table" << std::endl;
+            sqlite3_free(messRes);
+        }
+        else { std::cout << "Table Created" << std::endl; }
+        sqlite3_close(db);
+    }
+    catch (const std::exception &e){
+        std::cerr << e.what();
+    }   
+
+    bool popTable = true;
+    int err = sqlite3_open_v2("./BreakOutScores.db", &db, SQLITE_OPEN_READWRITE, NULL);
+    sqlite3_stmt* stmt;
+    const char* sql = "SELECT * FROM scores;";
+    if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) == SQLITE_OK) {
+        while (sqlite3_step(stmt) == SQLITE_ROW) {
+            popTable = false;
+            break;
+        }
+    }
+    sqlite3_finalize(stmt);
+    if(popTable){
+        char* popErr;
+        std::string tblPop = "INSERT INTO scores VALUES (1, 0)";
+        int exit = sqlite3_exec(db, tblPop.c_str(), NULL, 0, &popErr);
+        if(exit != SQLITE_OK ){
+            std::cerr << "Table Population Failed" << std::endl;
+            sqlite3_free(popErr);
+        }
+        else {
+            std::cout << "Table Populated with no errors" << std::endl;
+        }
+    }
+    else {std::cout << "Table was already Populated" << std::endl; }
+
+    sqlite3_close(db);
+    
+    
+}
+
+
+
 /**
  * Handle gameplay loop monitoring keypresses, mouse clicks and other inputs, clearing the window, and updating/drawing the game elements
  */
@@ -194,6 +272,7 @@ void Game::initialize() {
         statusText->setFillColor(sf::Color::White);
         menuTitleText.emplace(hudFont, "", 40);
         menuLineText.emplace(hudFont, "", 22);
+        hiScoreText.emplace(hudFont, "", 22);
     } else {
         hasHudFont = false;
         scoreText.reset();
@@ -689,6 +768,16 @@ void Game::renderMainMenu() {
         }
         window.draw(*menuLineText);
     }
+
+    if(hiScore > 0){
+        std::string scoreString = "High Score: " + std::to_string(hiScore);
+        hiScoreText->setString(scoreString);
+        const sf::FloatRect b = hiScoreText->getLocalBounds();
+        hiScoreText->setOrigin({b.position.x + b.size.x / 2.f, b.position.y + b.size.y / 2.f});
+        hiScoreText->setPosition({cx, 550.f});
+        window.draw(*hiScoreText);
+    }
+    
 
     menuLineText->setString("Up/Down: Navigate \n  Enter: Select");
     menuLineText->setFillColor(sf::Color(180, 180, 180));

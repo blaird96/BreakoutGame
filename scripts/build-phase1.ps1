@@ -37,6 +37,8 @@ Write-Host "Using SFML root: $Sfml"
     (Join-Path $Root "src\GameManager.cpp") `
     "-L$Sfml\lib" `
     -lsfml-graphics -lsfml-window -lsfml-system -lsfml-audio `
+    "-L$Root\lib" `
+    -lsqlite3 `
     -o $Out
 
 if (-not (Test-Path -LiteralPath $Out)) {
