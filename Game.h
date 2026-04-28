@@ -107,7 +107,7 @@ private:
     std::optional<sf::Sound> brickSound;
     bool brickSoundLoaded = false;
 
-    std::string ballBounceFPath = "";
+    std::string ballBounceFPath = "assets/audio/cardboard_tube.wav";
     sf::SoundBuffer bounceSoundBuffer;
     std::optional<sf::Sound> bounceSound;
     bool bounceSoundLoaded = false;
