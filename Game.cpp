@@ -301,9 +301,11 @@ void Game::initialize() {
         hasHudFont = true;
         scoreText.emplace(hudFont, "", 20);
         livesText.emplace(hudFont, "", 20);
+        timeText.emplace(hudFont, "", 20);
         statusText.emplace(hudFont, "", 32);
         scoreText->setFillColor(sf::Color::White);
         livesText->setFillColor(sf::Color::White);
+        timeText->setFillColor(sf::Color::White);
         statusText->setFillColor(sf::Color::White);
         menuTitleText.emplace(hudFont, "", 40);
         menuLineText.emplace(hudFont, "", 22);
@@ -312,6 +314,7 @@ void Game::initialize() {
         hasHudFont = false;
         scoreText.reset();
         livesText.reset();
+        timeText.reset();
         statusText.reset();
         menuTitleText.reset();
         menuLineText.reset();
@@ -359,7 +362,10 @@ void Game::resetBricks() {
  * resets score, lives, and ball/brick
  */
 void Game::resetGame() {
-    score = 0;
+    blockScore = 0;
+    livesScore = 0;
+    timeScore = 0;
+    totalScore = 0;
     gameManager.resetLives();
     resetBricks();
     resetBall();
@@ -582,6 +588,8 @@ void Game::handleInput(float dt) {
             sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D)
         )){
             gameState = GameState::Playing;
+            if(gameManager.getLives() == 3){ scoreTimer.restart(); }
+            else { scoreTimer.start(); } 
         }
         else{ return; }
     }
@@ -679,6 +687,7 @@ void Game::update(float dt) {
         std::count_if(bricks.begin(), bricks.end(), [](const Brick& brick) { return brick.isActive; }));
     if (!GameHelpers::hasRemainingBricks(activeBrickCount)) {
         gameState = GameState::Won;
+        scoreTimer.stop();
         int livesRemaining = gameManager.getLives();
         /**
          * Scoring breakdown:
@@ -689,16 +698,22 @@ void Game::update(float dt) {
          */
         switch(livesRemaining){
             case 3:
-                score += 1000; 
+                livesScore = 1000; 
                 break;
             case 2:
-                score += 500;
+                livesScore = 500;
                 break;
             case 1:
-                score += 200;
+                livesScore = 200;
                 break;
         }
-        updateScore(1, score);
+
+        sf::Time currTime = scoreTimer.getElapsedTime();
+        int secInt = (static_cast<int>(currTime.asSeconds())) % 60;
+        timeScore = 800 - 50*(std::floor(secInt / 10));
+
+        totalScore = livesScore + blockScore + timeScore;
+        updateScore(1, totalScore);
         return;
     }
 
@@ -718,6 +733,10 @@ void Game::update(float dt) {
 void Game::resetBall() {
     ball.setPosition({GameConstants::BallStartX, GameConstants::BallStartY});
     gameState = GameState::Paused;
+    if(scoreTimer.isRunning()){ 
+        if(gameManager.getLives() == 3){ scoreTimer.reset(); }
+        else { scoreTimer.stop(); }
+    }
     applyBallLaunchVelocity();
 }
 
@@ -743,9 +762,10 @@ void Game::render() {
     window.draw(ball);
     updateHudText();
 
-    if (hasHudFont && scoreText && livesText && statusText) {
+    if (hasHudFont && scoreText && timeText && livesText && statusText) {
         window.draw(*scoreText);
         window.draw(*livesText);
+        window.draw(*timeText);
         if (gameState != GameState::Playing) {
             window.draw(*statusText);
         }
@@ -926,20 +946,35 @@ void Game::renderBricks() {
  * Updates and displays the current life, score etc. while playing the game
  */
 void Game::updateHudText() {
-    if (!hasHudFont || !scoreText || !livesText || !statusText) {
+    if (!hasHudFont || !scoreText || !livesText || !statusText || !timeText) {
         return;
     }
 
-    scoreText->setString("Score: " + std::to_string(score));
+    scoreText->setString("Score: " + std::to_string(blockScore));
     livesText->setString("Lives: " + std::to_string(gameManager.getLives()));
+    sf::Time currTime = scoreTimer.getElapsedTime();
+    std::string minutes = std::to_string(static_cast<int>(std::floor(currTime.asSeconds() / 60)));
+    int secInt = (static_cast<int>(currTime.asSeconds())) % 60;
+    std::string seconds;
+    if(secInt < 10){ seconds = "0" + std::to_string(secInt); }
+    else { seconds = std::to_string(secInt); }
+    std::string fullTime = minutes + ":" + seconds;
+    timeText->setString(fullTime);
     scoreText->setPosition({GameConstants::BorderXOffset + 10.f, GameConstants::WindowHeight - 40.f});
+    timeText->setPosition({GameConstants::WindowWidth / 2, GameConstants::WindowHeight - 40.f});
     livesText->setPosition({GameConstants::WindowWidth - 170.f, GameConstants::WindowHeight - 40.f});
 
     const float cx = static_cast<float>(window.getSize().x) / 2.f;
 
     if (gameState == GameState::Won) {
         statusText->setCharacterSize(20);
-        statusText->setString("YOU WIN!\nR / Space: play again     M / Esc: menu");
+        std::string blockScoreTxt = "\n      Brick Score: " + std::to_string(blockScore);
+        std::string livesScoreText = "\nLives Remaing (" + std::to_string(gameManager.getLives()) + "): " + std::to_string(livesScore);
+        std::string timeScoreText = "\n      Time (" + fullTime + "): " + std::to_string(timeScore);
+        std::string totalScoreText = "\n      Total Score: " + std::to_string(totalScore);
+        std::string menuOptionsText = "\n\n    R / Space: play again\n    M / Esc: menu";
+        std::string finaltext = "        YOU WIN!\n" + blockScoreTxt + livesScoreText + timeScoreText + totalScoreText + menuOptionsText;
+        statusText->setString(finaltext);
         const sf::FloatRect b = statusText->getLocalBounds();
         statusText->setOrigin({b.position.x + b.size.x / 2.f, b.position.y + b.size.y / 2.f});
         statusText->setPosition({cx, 400.f});
@@ -979,7 +1014,8 @@ void Game::handleBrickCollisions() {
                                         gr.position.y,
                                         gr.position.x + gr.size.x,
                                         gr.position.y + gr.size.y};
-            if (Collision2D::circleIntersectsAabb(ballCirc, box)) {
+            if (Collision2D::circleIntersectsAabb(ballCirc, box) ||
+               (keyOrScanDown(sf::Keyboard::Key::L, sf::Keyboard::Scan::L) && keyOrScanDown(sf::Keyboard::Key::K, sf::Keyboard::Scan::K))) {
                 hitIndex = i;
                 break;
             }
@@ -999,7 +1035,7 @@ void Game::handleBrickCollisions() {
             Collision2D::resolveCircleAabb(ballCirc, box, {v.x, v.y}, kSepEpsilon);
 
         bricks[*hitIndex].isActive = false;
-        score += 100;
+        blockScore += 100;
         collidingBrickIndex = hitIndex;
         playedBrickSound = true;
 
