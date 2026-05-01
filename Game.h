@@ -6,6 +6,7 @@
 #include <SFML/Audio.hpp>
 #include <optional>
 #include <vector>
+#include <cmath>
 #include "sqlite3.h"
 
 #include "src/GameManager.h"
@@ -66,6 +67,7 @@ private:
     int hiScore;
     std::vector<int> hiScores;
     sf::Clock frameClock_;
+    sf::Clock scoreTimer;
     sf::RenderWindow window;
     sf::RectangleShape paddle;
     sf::CircleShape ball;
@@ -74,6 +76,7 @@ private:
     std::optional<sf::Text> scoreText;
     std::optional<sf::Text> livesText;
     std::optional<sf::Text> statusText;
+    std::optional<sf::Text> timeText;
     bool hasHudFont = false;
     std::optional<sf::Text> menuTitleText;
     std::optional<sf::Text> menuLineText;
@@ -88,7 +91,10 @@ private:
     float paddleSpeedMultiplier = 1.f;
     float ballSpeedMultiplier = 1.f;
     std::vector<Brick> bricks;
-    int score = 0;
+    int blockScore = 0;
+    int livesScore = 0;
+    int timeScore = 0;
+    int totalScore = 0;
     GameState gameState = GameState::Playing;
     std::optional<std::size_t> collidingBrickIndex;
     PhysicsManager physicsManager;
@@ -107,7 +113,7 @@ private:
     std::optional<sf::Sound> brickSound;
     bool brickSoundLoaded = false;
 
-    std::string ballBounceFPath = "";
+    std::string ballBounceFPath = "assets/audio/cardboard_tube.wav";
     sf::SoundBuffer bounceSoundBuffer;
     std::optional<sf::Sound> bounceSound;
     bool bounceSoundLoaded = false;
