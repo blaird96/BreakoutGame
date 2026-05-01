@@ -89,82 +89,49 @@ inline CircleAabbResolveResult resolveCircleAabb(const Circle& c,
             }
         }
     } else {
-        // Degenerate closest point (center on/in the box slab): resolve by smallest positive
-        // face correction, or nearest exit if the circle is fully contained.
-        const float pushFromLeft = (b.minX - (c.cx - c.r)) + epsilon;
-        const float pushFromRight = ((c.cx + c.r) - b.maxX) + epsilon;
-        const float pushFromTop = (b.minY - (c.cy - c.r)) + epsilon;
-        const float pushFromBottom = ((c.cy + c.r) - b.maxY) + epsilon;
+        // Degenerate closest point (center on/in the box slab): move the circle fully
+        // outside through the nearest face.
+        const float leftTarget = b.minX - c.r - epsilon;
+        const float rightTarget = b.maxX + c.r + epsilon;
+        const float topTarget = b.minY - c.r - epsilon;
+        const float bottomTarget = b.maxY + c.r + epsilon;
 
-        float best = std::numeric_limits<float>::infinity();
-        std::int8_t axis = -1;  // 0=L,1=R,2=T,3=B
-        auto consider = [&](float amount, std::int8_t a) {
-            if (amount > 0.f && amount < best) {
-                best = amount;
-                axis = a;
-            }
-        };
-        consider(pushFromLeft, 0);
-        consider(pushFromRight, 1);
-        consider(pushFromTop, 2);
-        consider(pushFromBottom, 3);
+        const float moveLeft = std::fabs(c.cx - leftTarget);
+        const float moveRight = std::fabs(rightTarget - c.cx);
+        const float moveTop = std::fabs(c.cy - topTarget);
+        const float moveBottom = std::fabs(bottomTarget - c.cy);
 
-        if (axis >= 0) {
-            switch (axis) {
-                case 0:
-                    out.cx = c.cx + pushFromLeft;
-                    out.reflectX = true;
-                    break;
-                case 1:
-                    out.cx = c.cx - pushFromRight;
-                    out.reflectX = true;
-                    break;
-                case 2:
-                    out.cy = c.cy + pushFromTop;
-                    out.reflectX = false;
-                    break;
-                default:
-                    out.cy = c.cy - pushFromBottom;
-                    out.reflectX = false;
-                    break;
-            }
-        } else {
-            // Fully contained: exit through the nearest face (smallest center correction).
-            const float exitL = std::fabs((b.minX + c.r) - c.cx);
-            const float exitR = std::fabs((b.maxX - c.r) - c.cx);
-            const float exitT = std::fabs((b.minY + c.r) - c.cy);
-            const float exitB = std::fabs((b.maxY - c.r) - c.cy);
-            float m = exitL;
-            axis = 0;
-            if (exitR < m) {
-                m = exitR;
-                axis = 1;
-            }
-            if (exitT < m) {
-                m = exitT;
-                axis = 2;
-            }
-            if (exitB < m) {
-                axis = 3;
-            }
-            switch (axis) {
-                case 0:
-                    out.cx = b.minX + c.r + epsilon;
-                    out.reflectX = true;
-                    break;
-                case 1:
-                    out.cx = b.maxX - c.r - epsilon;
-                    out.reflectX = true;
-                    break;
-                case 2:
-                    out.cy = b.minY + c.r + epsilon;
-                    out.reflectX = false;
-                    break;
-                default:
-                    out.cy = b.maxY - c.r - epsilon;
-                    out.reflectX = false;
-                    break;
-            }
+        float best = moveLeft;
+        std::int8_t axis = 0;  // 0=L,1=R,2=T,3=B
+        if (moveRight < best) {
+            best = moveRight;
+            axis = 1;
+        }
+        if (moveTop < best) {
+            best = moveTop;
+            axis = 2;
+        }
+        if (moveBottom < best) {
+            axis = 3;
+        }
+
+        switch (axis) {
+            case 0:
+                out.cx = leftTarget;
+                out.reflectX = true;
+                break;
+            case 1:
+                out.cx = rightTarget;
+                out.reflectX = true;
+                break;
+            case 2:
+                out.cy = topTarget;
+                out.reflectX = false;
+                break;
+            default:
+                out.cy = bottomTarget;
+                out.reflectX = false;
+                break;
         }
     }
 

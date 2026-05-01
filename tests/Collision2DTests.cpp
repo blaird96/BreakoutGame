@@ -20,7 +20,7 @@ TEST_CASE(circle_aabb_hit_from_left_reflect_x) {
     const auto r = Collision2D::resolveCircleAabb(c, b, {120.f, 0.f}, 0.01f);
     CHECK(r.hit);
     CHECK(r.reflectX);
-    CHECK(r.cx > c.cx);
+    CHECK(r.cx < c.cx);
 }
 
 TEST_CASE(circle_aabb_hit_from_top_reflect_y) {
@@ -30,7 +30,7 @@ TEST_CASE(circle_aabb_hit_from_top_reflect_y) {
     const auto r = Collision2D::resolveCircleAabb(c, b, {0.f, 80.f}, 0.01f);
     CHECK(r.hit);
     CHECK(!r.reflectX);
-    CHECK(r.cy > c.cy);
+    CHECK(r.cy < c.cy);
 }
 
 TEST_CASE(circle_aabb_separation_clears_overlap) {

@@ -15,6 +15,7 @@ Unit*.md
 
 ## Keep the project README tracked
 !README.md
+!CMakeLists.txt
 
 ## Ignore local build and CMake output
 build/
