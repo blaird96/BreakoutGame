@@ -1,5 +1,3 @@
-/*DON'T THINK THIS FILE/CLASS ISN'T NEEDED FOR THE PROGRAM */
-
 #pragma once
 
 #include "../GameHelpers.h"
