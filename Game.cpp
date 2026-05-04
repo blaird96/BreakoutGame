@@ -711,6 +711,7 @@ void Game::update(float dt) {
         sf::Time currTime = scoreTimer.getElapsedTime();
         int secInt = (static_cast<int>(currTime.asSeconds())) % 60;
         timeScore = 800 - 50*(std::floor(secInt / 10));
+        if(timeScore < 0){timeScore = 0;}
 
         totalScore = livesScore + blockScore + timeScore;
         updateScore(1, totalScore);
